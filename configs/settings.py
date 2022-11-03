@@ -24,12 +24,12 @@ env.read_env()
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ur98xf4d5*-l#ku!@lz@6p1pyml^mmm$^^d)5(9yq*nr!8eri+'
-# SECRET_KEY = env('SECRET_KEY')
+# SECRET_KEY = 'django-insecure-ur98xf4d5*-l#ku!@lz@6p1pyml^mmm$^^d)5(9yq*nr!8eri+'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# DEBUG = env.bool('DEBUG', default=False)
+# DEBUG = True
+DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = ['*']
 
@@ -37,6 +37,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,6 +56,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -89,10 +91,11 @@ WSGI_APPLICATION = 'configs.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    },
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # },
+    'default': env.dj_db_url("DATABASE_URL", )
     # 'default': {
     #     'ENGINE': 'django.db.backends.postgresql',
     #     'NAME': env.str('DB_NAME'),
@@ -141,6 +144,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = 'staticfiles'
 STATICFILES_DIRS = [str(BASE_DIR.joinpath('static'))]
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # Media files
 MEDIA_URL = 'media/'
