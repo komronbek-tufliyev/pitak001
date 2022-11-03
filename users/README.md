@@ -52,6 +52,8 @@
 
 ## Ro'yxatdan o'tish 
 ### POST /api/users/register/
+Ro'yxatdan o'tishdan oldin sms yuboriladi. Smsni tekshirishdan keyin ro'yxatdan o'tish mumkin.
+
 Request: 
 ```json{
     {
@@ -66,7 +68,9 @@ Request:
 ![Register](../readme_src/users/register.png)
 
 
-## POST /api/users/login/
+## Tizimga kirish. Login 
+### POST /api/users/login/
+LOGIN qilishdan oldin sms yuboriladi. Smsni tekshirishdan keyin login mumkin.
 ```json{
     {
         "phone": "998901234567", //required
