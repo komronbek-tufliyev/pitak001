@@ -183,6 +183,8 @@ class LoginView(APIView):
                         # token = get_tokens_for_user(user)
                         if user.check_password(password):
                             token = get_tokens_for_user(user)
+                            user.is_authenticated = True
+                            user.save()
                             return Response({'message': 'User logged in successfully', 'token': token}, status=status.HTTP_200_OK)
                         else:
                             return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
@@ -271,6 +273,9 @@ class LogoutView(APIView):
         serializer = LogoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        user = request.user 
+        user.is_authenticated=False
+        user.save()
         return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
 
 

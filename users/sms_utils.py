@@ -47,9 +47,13 @@ class SendSMS:
     
     def get_user_info(self):
         endpoint = f"{self.BASE_URL}/auth/user"
-        payload = {}
+        payload = {
+            'email': self.email,
+            'password': self.password
+        }
         req = self._call('GET', endpoint, payload)
-        print(req)
+        data = req.json()
+        print(data)
 
 
     def send_sms(self, message: str, phone: str) -> None:
@@ -62,14 +66,17 @@ class SendSMS:
         }
         method: str = "POST"
         try:
-            req = self._call(method, endpoint, payload)
-            if req.status_code == 200:
+            res = self._call(method, endpoint, payload)
+            print("Response ", res)
+            print("Response_code ", res.status_code)
+            if res.status_code == 200:
                 print("SMS sent successfully")
             else:
-                print("Can not send sms ")
+                print("Can not send sms ", res.status_code)
         except Exception as e:
             print("Error ", e)
-            return f"Error: {e}"
+            # return f"Error: {e}"
+            raise Exception(f"Error: {e}")
 
     def send_global_sms(self, phone: str, message: str, country_code: str) -> None:
         endpoint: str = f"{self.BASE_URL}/message/sms/send-global"
@@ -82,8 +89,10 @@ class SendSMS:
         }
         method: str = "POST"
         try:
-            req = self._call(method, endpoint, payload)
-            if req.status_code == 200:
+            res = self._call(method, endpoint, payload)
+            print("Response ", res)
+            print("Response_code ", res.status_code)
+            if res.status_code == 200:
                 print("SMS sent successfully")
             else:
                 print("Can not send sms ")
