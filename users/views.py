@@ -27,6 +27,14 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken, AuthenticationFailed
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
+
+class MyPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 
 User = get_user_model()
 
@@ -183,8 +191,6 @@ class LoginView(APIView):
                         # token = get_tokens_for_user(user)
                         if user.check_password(password):
                             token = get_tokens_for_user(user)
-                            user.is_authenticated = True
-                            user.save()
                             return Response({'message': 'User logged in successfully', 'token': token}, status=status.HTTP_200_OK)
                         else:
                             return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
@@ -222,6 +228,8 @@ class UsersListView(generics.ListAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()   
     http_method_names = ['get']
+    pagination_class = MyPagination
+
 
 class UserView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticated,  )
@@ -273,9 +281,6 @@ class LogoutView(APIView):
         serializer = LogoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        user = request.user 
-        user.is_authenticated=False
-        user.save()
         return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
 
 
@@ -284,3 +289,16 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
+class APILogoutView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        if self.request.data.get('all'):
+            token: OutstandingToken
+            for token in OutstandingToken.objects.filter(user=request.user):
+                _, _ = BlacklistedToken.objects.get_or_create(token=token)
+            return Response({"status": "OK, goodbye, all refresh tokens blacklisted"})
+        refresh_token = self.request.data.get('refresh_token')
+        token = RefreshToken(token=refresh_token)
+        token.blacklist()
+        return Response({"status": "OK, goodbye"})

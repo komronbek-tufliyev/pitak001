@@ -9,7 +9,8 @@ from .views import (
     LogoutView,
     UsersListView,
     UpdateUserView,
-    DeleteUserView
+    DeleteUserView,
+    APILogoutView,
 )
 
 # router = routers.DefaultRouter()
@@ -30,7 +31,7 @@ urlpatterns = [
     path('send-otp/', SendOTPView.as_view(), name='send-otp'),
     path('users/register/', RegisterView.as_view(), name='register'),
     path('users/login/', LoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    path('users/logout/', APILogoutView.as_view(), name='logout'),
 ] 
 
 # urlpatterns += router.urls
