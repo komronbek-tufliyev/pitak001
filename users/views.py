@@ -59,9 +59,13 @@ class ValidateOTPView(APIView):
             phoneotp = PhoneOTP.objects.filter(phone=phone)
             user = User.objects.filter(phone=phone)
             if not user.exists():
-                return Response({
-                    'message': 'User does not exist in database',
-                }, status=status.HTTP_204_NO_CONTENT)
+                phoneotp = phoneotp.first()
+                user = user.first()
+                if phoneotp.otp == otp:
+                    phoneotp.is_verified = True
+                    phoneotp.save()
+                    return Response({'message': 'OTP verified successfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
+ 
             if phoneotp.exists() and user.exists():
                 phoneotp = phoneotp.first()
                 user = user.first()
@@ -74,6 +78,8 @@ class ValidateOTPView(APIView):
                     return Response({'message': 'OTP verified successfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
                 else:
                     return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'message': "Something went wrong while validating otp"}, status=status.HTTP_102_PROCESSING)
         else:
             return Response({'message': 'Invalid phone number'}, status=status.HTTP_400_BAD_REQUEST)
 
