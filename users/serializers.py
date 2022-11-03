@@ -161,30 +161,10 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
         # return user 
 
-# class LoginSerializer(serializers.Serializer):
-#     phone = serializers.CharField()
-#     password = serializers.CharField()
-
-#     def validate(self, data):
-#         phone = data.get('phone')
-#         password = data.get('password')
-#         if phone and password:
-#             phone = phone.replace('+', '')
-#             try:
-#                 user = authenticate(request=self.context.get('request'), phone=phone, password=password)
-#                 print("User: ", user)
-#             except Exception as e:
-#                 print("Error: ", e)
-#             if not user:
-#                 msg = 'Unable to log in with provided credentials.'
-#                 raise AuthenticationFailed(msg, code='authorization')
-            
-#         else:
-#             msg = 'Must include "phone" and "password".'
-#             raise AuthenticationFailed(msg, code='authorization')
-
-#         data['user'] = user
-#         return data
+class LoginSerializer(serializers.Serializer):
+    phone = serializers.CharField()
+    password = serializers.CharField()
+    
 
 """class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
