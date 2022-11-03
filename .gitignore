@@ -1,5 +1,12 @@
-.env
-db.sqlite3
-__pycache__
-venv
+/.env
+
+
+/migrations/*
+
 /media/images/*
+
+venv
+
+__pycache__
+
+db.sqlite3
