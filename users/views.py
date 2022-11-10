@@ -29,6 +29,7 @@ from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
+from drf_yasg import openapi
 
 class MyPagination(PageNumberPagination):
     page_size = 10
@@ -72,7 +73,7 @@ class ValidateOTPView(APIView):
                 if phoneotp.otp == otp:
                     phoneotp.is_verified = True
                     phoneotp.save()
-                    return Response({'message': 'OTP verified successfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
+                    return Response({'message': 'OTP verified succesfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
  
             if phoneotp.exists() and user.exists():
                 phoneotp = phoneotp.first()
@@ -83,7 +84,7 @@ class ValidateOTPView(APIView):
 
                     user.set_password(otp)
                     user.save()
-                    return Response({'message': 'OTP verified successfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
+                    return Response({'message': 'OTP verified succesfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
                 else:
                     return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
             else:
@@ -97,7 +98,16 @@ class SendOTPView(APIView):
     serializer_class = ValidateSendOTPSerializer
     http_method_names = ['post']
 
-    @swagger_auto_schema(request_body=ValidateSendOTPSerializer)
+    send_otp_response = openapi.Response('response description', ValidateSendOTPSerializer)
+    send_otp_schema = openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'status': openapi.Schema(type=openapi.TYPE_STRING, description='boolean'),
+            'detail': openapi.Schema(type=openapi.TYPE_STRING, description='string'),
+        },
+    )
+
+    @swagger_auto_schema(request_body=ValidateSendOTPSerializer, responses={200: send_otp_response}, response_body=send_otp_schema, )
     def post(self, request, *args, **kwargs):
         serializer = ValidateSendOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -119,11 +129,11 @@ class SendOTPView(APIView):
             else:
                 print("No phoneotp exists")
                 phone_otp = PhoneOTP.objects.create(phone=phone, otp=key)
-            return Response({'message': 'OTP sent successfully'}, status=status.HTTP_200_OK)
+            return Response({'message': 'OTP sent succesfully'}, status=status.HTTP_200_OK)
 
             # phoneotp = PhoneOTP.objects.create(phone=phone, otp=key)
             # phoneotp.save()
-            # return Response({'message': 'OTP sent successfully'}, status=status.HTTP_200_OK)
+            # return Response({'message': 'OTP sent succesfully'}, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response({'message': 'Error sending OTP'}, status=status.HTTP_400_BAD_REQUEST)
@@ -149,7 +159,7 @@ class RegisterView(generics.CreateAPIView):
                     serializer = CreateUserSerializer(data=request.data)
                     serializer.is_valid(raise_exception=True)
                     user = serializer.save()
-                    return Response({'message': 'User registered successfully',}, status=status.HTTP_201_CREATED)
+                    return Response({'message': 'User registered succesfully',}, status=status.HTTP_201_CREATED)
 
                 else:
                     return Response({'message': 'Please verify OTP first'}, status=status.HTTP_400_BAD_REQUEST)
@@ -191,7 +201,7 @@ class LoginView(APIView):
                         # token = get_tokens_for_user(user)
                         if user.check_password(password):
                             token = get_tokens_for_user(user)
-                            return Response({'message': 'User logged in successfully', 'token': token}, status=status.HTTP_200_OK)
+                            return Response({'message': 'User logged in succesfully', 'token': token}, status=status.HTTP_200_OK)
                         else:
                             return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
                     else:
@@ -212,8 +222,8 @@ class LoginView(APIView):
     #     user = User.objects.get(phone=phone)
     #     if user.check_password(password):
     #         token = get_tokens_for_user(user)
-    #         return Response({'message': 'User logged in successfully', 'token': token}, status=status.HTTP_200_OK)
-    #         # return Response({'message': 'User logged in successfully'}, status=status.HTTP_200_OK)
+    #         return Response({'message': 'User logged in succesfully', 'token': token}, status=status.HTTP_200_OK)
+    #         # return Response({'message': 'User logged in succesfully'}, status=status.HTTP_200_OK)
     #     else:
     #         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -281,7 +291,7 @@ class LogoutView(APIView):
         serializer = LogoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
+        return Response({'message': 'User logged out succesfully'}, status=status.HTTP_200_OK)
 
 
 

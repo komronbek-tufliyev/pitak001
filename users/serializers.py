@@ -8,6 +8,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken, AuthenticationFailed
 from django.contrib.auth import get_user_model
 from .models import PhoneOTP, User
+from django.utils.translation import gettext_lazy as _
 
 User = get_user_model()
 
@@ -68,18 +69,29 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 
 class ValidateSendOTPSerializer(serializers.Serializer):
-    phone = serializers.CharField()
+    phone = serializers.CharField(max_length=13, allow_null=False, min_length=13, help_text=_("Telefon raqam: 998XX123ZZYY"))
 
     def validate_phone(self, phone):
         if not phone:
             raise serializers.ValidationError('Phone number is required')
         
         return phone
-    
+
+    # def to_representation(self, instance):
+    #     representation_dict: dict = {
+    #         'status': "True",
+    #         'detail': 'Otp sent succesfully'
+    #     }
+    #     return representation_dict 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        print("Data respresentation", data)
+        data.update({'detail': 'Otp sent succesfully'})
+        return data
 
 class ValidateOTPSerializer(serializers.Serializer):
-    phone = serializers.CharField()
-    otp = serializers.CharField()
+    phone = serializers.CharField(max_length=13, help_text=_("Telefon raqam: 998XX123ZZYY"),allow_null=False)
+    otp = serializers.CharField(max_length=4, min_length=4, help_text=_("Bir martalik yuborilgan kodd"), allow_null=False)
 
     def validate(self, attrs):
         phone = attrs.get('phone')
@@ -162,43 +174,9 @@ class CreateUserSerializer(serializers.ModelSerializer):
         # return user 
 
 class LoginSerializer(serializers.Serializer):
-    phone = serializers.CharField()
-    password = serializers.CharField()
+    phone = serializers.CharField(min_length=13, max_length=13, help_text=_("Telefon raqam: 998XX123ZZYY"))
+    password = serializers.CharField(min_length=4, max_length=4, help_text=_("Parol. Bir martalik tasdiqlangan/yuborilgan kod"))
     
-
-"""class LoginSerializer(serializers.Serializer):
-    phone = serializers.CharField()
-    password = serializers.CharField()
-
-    def validate(self, attrs):
-        phone = attrs.get('phone')
-        password = attrs.get('password')
-        if phone and password:
-            if User.objects.filter(phone=phone).exists():
-                user = authenticate(**attrs)
-                if user and user.is_active:
-                    return user 
-                print("User.. user auth", user)
-            else:
-                msg = {
-                    'register': False,
-                    'detail': 'Phone number not found',
-                }
-                raise serializers.ValidationError(msg)
-
-            if not user:
-                msg = {
-                    'register': False,
-                    'detail': 'Unable to login with provided credentials', 
-                }
-                raise serializers.ValidationError(msg, code='authorization')
-        else:
-            msg = {
-                'status': False,
-                'detail': 'Phone number or password not found in request'
-            }
-            raise serializers.ValidationError(msg, code='authorization')
-        return False"""
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()

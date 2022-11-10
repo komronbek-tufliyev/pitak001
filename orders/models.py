@@ -2,12 +2,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _ 
 # from django.core.validators import RegexValidator
 from django.contrib.auth import get_user_model
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
-from django.core.signals import request_finished, request_started
-
-from django.dispatch import receiver
-from django.conf import settings
 
 from users.models import User
 
@@ -34,8 +28,8 @@ class Place(models.Model):
         ('Xorazm', 'Xorazm'),
 
     )
-    name = models.CharField(max_length=50, verbose_name=_('Place Name'))
-    region = models.CharField(max_length=100, verbose_name=_('Region'), choices=REGION_CHOICES)
+    name = models.CharField(max_length=50, verbose_name=_('Place Name'), help_text=_("Joy nomi. M: Yunusobod"))
+    region = models.CharField(max_length=100, verbose_name=_('Region'), choices=REGION_CHOICES, help_text=_("Viloyat nomi, 14ta tanlov bor."))
 
     def __str__(self) -> str:
         return self.name
@@ -66,38 +60,37 @@ class Order(models.Model):
 
     )
     _ORDER_ERROR_MESSAGE = _("Order error message")
-    name = models.CharField(_('name'), max_length=50, blank=True, null=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
-    car = models.CharField(_('car'), max_length=50, blank=True, null=True)
-    car_number = models.CharField(_('car_number'), max_length=50, blank=True, null=True)
-    description = models.TextField(_('description'), blank=True, null=True)
+    name = models.CharField(_('name'), max_length=50, blank=True, null=True, help_text=_("Buyurtma nomi(kiritlishi shart emas), ixtiyoriy."))
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders', help_text=_("Buyurtmachi id'si"))
+    car = models.CharField(_('car'), max_length=50, blank=True, null=True, help_text=_("Mashina nomi, M: Gentra"))
+    car_number = models.CharField(_('car_number'), max_length=50, blank=True, null=True, help_text=_("Mashina raqami(shart emas), ixtiyoriy"))
+    description = models.TextField(_('description'), blank=True, null=True, help_text=_("Buyurtma haqida qo'shimcha izoh"))
     # from_place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='from_place')
     # to_place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='to_place')
-    from_place = models.CharField(max_length=100, verbose_name=_('From Place'), choices=REGION_CHOICES)
-    to_place = models.CharField(max_length=100, verbose_name=_('To Place'), choices=REGION_CHOICES)
-    date = models.DateField(_('date'), blank=True, null=True)
-    price = models.IntegerField(_('price'), blank=True, null=True)
+    from_place = models.CharField(max_length=100, verbose_name=_('From Place'), choices=REGION_CHOICES, help_text=_("Joy nomi, qayerdan..."))
+    to_place = models.CharField(max_length=100, verbose_name=_('To Place'), choices=REGION_CHOICES, help_text=_("Joy nomi, qayerga..."))
+    date = models.DateField(_('date'), blank=True, null=True, help_text=_("Buyurtma vaqti(ketish vaqti) YYYY-MM-DD. M: 2022-12-25"))
+    price = models.IntegerField(_('price'), blank=True, null=True, help_text=_("Narxi"))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    image = models.FileField(upload_to='images/orders/%Y/%m/%d/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
-    is_accepted = models.BooleanField(default=False)
-    is_finished = models.BooleanField(default=False)
-    is_canceled = models.BooleanField(default=False)
-    is_paid = models.BooleanField(default=False)
-    is_driver = models.BooleanField(default=False)
+    is_accepted = models.BooleanField(default=False, help_text=_("Status: qabul qilinganmi"))
+    is_finished = models.BooleanField(default=False, help_text=_("Status: bajarilganmi"))
+    is_canceled = models.BooleanField(default=False, help_text=_("Status: rad etilganmi"))
+    is_paid = models.BooleanField(default=False, help_text=_("Status: to'langanmi"))
+    # is_driver = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         if self.name:
             return self.name
         else:
-            return self.owner.phone + ' ' + self.from_place.name + ' ' + self.to_place.name
+            return self.owner.phone + ' ' + self.from_place + ' ' + self.to_place
 
     def get_order_short_info(self) -> str:
         return self.name
 
     def get_order_full_info(self) -> str:
-        return self.name + ' Car: ' + self.car + ' owner: ' + self.owner.phone + 'from: ' + self.from_place.name + 'to: ' + self.to_place.name
+        return self.name + ' Car: ' + self.car + ' owner: ' + self.owner.phone + 'from: ' + self.from_place + 'to: ' + self.to_place
     
     def get_order_owner(self) -> str:
         return self.owner
@@ -154,17 +147,14 @@ class OrderComment(models.Model):
         verbose_name_plural = _('Order Comments')
 
 
-class OrderFile(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='files')
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='files')
-    file = models.FileField(upload_to='order_files', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+class OrderImage(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, help_text=_("Buyurtma raqami(id)"), related_name="order_image")
+    image = models.ImageField(upload_to='orders/%Y/%m/%d/', help_text=_("Buyurtirilgan mashina rasmi"))
+    
+    class Meta:
+        verbose_name = _('Order Image')
+        verbose_name_plural = _('Order Images')
 
     def __str__(self) -> str:
-        return self.file
-
-    class Meta:
-        verbose_name = _('Order File')
-        verbose_name_plural = _('Order Files')
-
+        return f"{self.pk} '+' {self.order.pk}. Media"
+    
