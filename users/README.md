@@ -66,7 +66,7 @@ Request:
     }
 ```
 ### Natija:
-![Register](../readme_src/users/register.png)
+![Register](../readme_src/users/users_register.png)
 
 
 ## Tizimga kirish. Login 
