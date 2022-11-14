@@ -8,7 +8,7 @@ User = get_user_model()
 class OrderImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderImage
-        fields = ['image']
+        fields = ['image', 'order']
         extra_kwargs = {'order': {'read_only': True}}
 
 
@@ -52,11 +52,13 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     images = OrderImageSerializer(many=True, read_only=True)
+    # temp_images = serializers.SerializerMethodField('get_order_images')
     class Meta:
         model = Order
         fields = ['id', 'name', 'owner', 'car', 'description', 'from_place', 'to_place', 'price', 'date', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images']
 
-
+    # def get_order_images(self):
+    #     pass
 
 
 class PlaceSerializer(serializers.ModelSerializer):

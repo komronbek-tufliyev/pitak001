@@ -148,7 +148,7 @@ class OrderComment(models.Model):
 
 
 class OrderImage(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, help_text=_("Buyurtma raqami(id)"), related_name="order_image")
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, help_text=_("Buyurtma raqami(id)"), related_name="images")
     image = models.ImageField(upload_to='orders/%Y/%m/%d/', help_text=_("Buyurtirilgan mashina rasmi"))
     
     class Meta:

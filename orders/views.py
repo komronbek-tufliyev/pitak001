@@ -23,13 +23,13 @@ from .serializers import (
 User = get_user_model()
 
 class OrderList(generics.ListAPIView):
-    queryset = Order.objects.all()
+    queryset = Order.objects.prefetch_related('images')
     serializer_class = OrderSerializer
     http_method_names = ['get']
 
 class OrderDetail(generics.RetrieveAPIView):
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
+    queryset = Order.objects.prefetch_related('images')
+    serializer_class = OrderSerializer(queryset, many=True)
     http_method_names = ['get']
 
 class OrderCreateView(viewsets.ModelViewSet):
