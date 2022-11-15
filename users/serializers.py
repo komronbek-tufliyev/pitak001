@@ -174,7 +174,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
         # return user 
 
 class LoginSerializer(serializers.Serializer):
-    phone = serializers.CharField(min_length=13, max_length=13, help_text=_("Telefon raqam: 998XX123ZZYY"))
+    phone = serializers.CharField(min_length=12, max_length=13, help_text=_("Telefon raqam: 998XX123ZZYY"))
     password = serializers.CharField(min_length=4, max_length=4, help_text=_("Parol. Bir martalik tasdiqlangan/yuborilgan kod"))
     
 

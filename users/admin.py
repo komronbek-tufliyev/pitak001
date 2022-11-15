@@ -6,6 +6,7 @@ from .models import (
     SMSToken,
 )
 from django.contrib.auth.models import Group
+from rest_framework_simplejwt import tokens, token_blacklist
 
 # Register your models here.
 
@@ -47,6 +48,10 @@ class PhoneOTPAdmin(admin.ModelAdmin):
 
 admin.site.register(PhoneOTP, PhoneOTPAdmin)
 
+class OutstandingTokenAdmin(token_blacklist.admin.OutstandingTokenAdmin):
+    def has_delete_permission(self, *args, **kwargs):
+        return True # or whatever logic you want
 
-
+admin.site.unregister(token_blacklist.models.OutstandingToken)
+admin.site.register(token_blacklist.models.OutstandingToken, OutstandingTokenAdmin)
 

@@ -159,7 +159,13 @@ class RegisterView(generics.CreateAPIView):
                     serializer = CreateUserSerializer(data=request.data)
                     serializer.is_valid(raise_exception=True)
                     user = serializer.save()
-                    return Response({'message': 'User registered succesfully',}, status=status.HTTP_201_CREATED)
+                    token = get_tokens_for_user(user)
+                    msg = {
+                        'message': 'User registered succesfully',
+                        'detail': serializer.data,
+                        'token': token,
+                    }
+                    return Response(msg, status=status.HTTP_201_CREATED)
 
                 else:
                     return Response({'message': 'Please verify OTP first'}, status=status.HTTP_400_BAD_REQUEST)
@@ -303,12 +309,12 @@ class APILogoutView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
-        if self.request.data.get('all'):
+        if self.request.data.get('refresh'):
             token: OutstandingToken
             for token in OutstandingToken.objects.filter(user=request.user):
                 _, _ = BlacklistedToken.objects.get_or_create(token=token)
-            return Response({"status": "OK, goodbye, all refresh tokens blacklisted"})
-        refresh_token = self.request.data.get('refresh_token')
+            return Response({"status": "OK, goodbye, all refresh tokens blacklisted"}, status=status.HTTP_205_RESET_CONTENT)
+        refresh_token = self.request.data.get('refresh')
         token = RefreshToken(token=refresh_token)
         token.blacklist()
-        return Response({"status": "OK, goodbye"})
+        return Response({"status": "OK, goodbye"}, status=status.HTTP_205_RESET_CONTENT)
