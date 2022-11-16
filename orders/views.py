@@ -5,6 +5,7 @@ from rest_framework import viewsets
 from drf_yasg.utils import swagger_auto_schema
 # from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
+from rest_framework.pagination import PageNumberPagination
 from django.utils.translation import gettext_lazy as _
 from .models import (
     Order,
@@ -22,10 +23,17 @@ from .serializers import (
 
 User = get_user_model()
 
+class MyPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
 class OrderList(generics.ListAPIView):
     queryset = Order.objects.prefetch_related('images')
     serializer_class = OrderSerializer
     http_method_names = ['get']
+    pagination_class = MyPagination
 
 class OrderDetail(generics.RetrieveAPIView):
     queryset = Order.objects.prefetch_related('images')
@@ -41,32 +49,7 @@ class OrderCreateView(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        # full_data = {
-        #     'owner': '',
-        #     'from_place': '',
-        #     'to_place': '',
-        #     'description': '',
-        #     'images': '',
-        #     'uploaded_images': '',
-        #     'price': '',
-        #     'car': '',
-        #     'date': '',
-        #     'car_number': '',
-        #     'created_at': '',
-        #     'updated_at': '',
-        #     "is_active": True,
-        #     "is_accepted": False,
-        #     "is_finished": False,
-        #     "is_canceled": False,
-        #     "is_paid": False,
-        #     "is_driver": False,
-        # }
-        # for key in full_data:
-        #     if key in request.data:
-        #         full_data[key] = request.data[key]
-      
-        # full_data['owner'] = request.user.id
-        # print("Full data", request.data)
+        
         serializer = CreateOrderSerializer(data=request.data, context={'owner': request.user})
 
         if serializer.is_valid(raise_exception=True):
@@ -92,6 +75,7 @@ class OrderCommentList(generics.ListAPIView):
     queryset = OrderComment.objects.all()
     serializer_class = OrderCommentSerializer
     http_method_names = ['get']
+    pagination_class = MyPagination
 
 class OrderCommentDetail(generics.RetrieveAPIView):
     queryset = OrderComment.objects.all()

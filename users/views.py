@@ -146,17 +146,27 @@ class RegisterView(generics.CreateAPIView):
     @swagger_auto_schema(request_body=CreateUserSerializer)
     def post(self, request, *args, **kwargs):
         phone = request.data.get('phone')
-        password = request.data.get('password')
-        if phone and password:
+        # password = request.data.get('password')
+        if phone:
             phone = phone.replace('+', '')
             phoneotp = PhoneOTP.objects.filter(phone=phone)
             if phoneotp.exists():
                 phoneotp = phoneotp.first()
                 if phoneotp.is_verified:
-                    request.data._mutable=True 
-                    request.data['phone'] = phone
-                    request.data._mutable = False
-                    serializer = CreateUserSerializer(data=request.data)
+                    name = None 
+                    is_driver = False
+                    if 'name' in request.data:
+                        name = request.data.get('name')
+                    if 'is_driver' in request.data:
+                        is_driver = request.data.get('is_driver')
+                    data: dict = {
+                        'phone': phone,
+                        'password': phoneotp.otp,
+                        'name': name,
+                        'is_driver': is_driver
+                    }
+                    print("Dict: ", data)
+                    serializer = CreateUserSerializer(data=data, context={'request': request})
                     serializer.is_valid(raise_exception=True)
                     user = serializer.save()
                     token = get_tokens_for_user(user)

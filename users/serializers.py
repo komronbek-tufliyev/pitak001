@@ -120,18 +120,13 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User 
-        fields = ['phone', 'password', 'name']
+        fields = ['phone', 'name', 'is_driver']
         extra_kwargs = {
             'password': {'write_only': True},
         }
 
     def validate(self, attrs):
         return super().validate(attrs)
-
-    def validate_password(self, password):
-        if not password:
-            raise serializers.ValidationError('Password is required')
-        return password
 
     def validate_phone(self, phone):
         if not phone:
@@ -140,9 +135,9 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 
     def validate(self, attrs):
+        print("Attrs", attrs)
         phone = attrs.get('phone')
-        password = attrs.get('password')
-        if phone and password:
+        if phone:
             phone = phone.replace('+', '')
             user = User.objects.filter(phone=phone)
             if user.exists():
@@ -150,17 +145,21 @@ class CreateUserSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('User already exists')
             return attrs
         
-        else:
-            
-            raise serializers.ValidationError('Phone and Password are required')
+        else:            
+            raise serializers.ValidationError('Phone are required')
     
  
     
     def create(self, validated_data):
         try:
             self.validate(validated_data)
+            print("Val data", validated_data)
             phone = validated_data.pop('phone').replace('+', '')
-            password = validated_data.pop('password')
+            phoneotp = PhoneOTP.objects.filter(phone=phone)
+            if phoneotp.exists():
+                password = phoneotp.first().otp
+            else:
+                raise serializers.ValidationError("Can not create user, because phoneotp does not exist")
             print("validated")
             user = User.objects.create(phone=phone, password=password, **validated_data)
             user.set_password(password)
