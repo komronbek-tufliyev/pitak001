@@ -12,6 +12,7 @@ from .models import (
     OrderComment,
     OrderImage,
     Place,
+    Likes,
 )
 
 from .serializers import (
@@ -19,6 +20,7 @@ from .serializers import (
     OrderCommentSerializer,
     CreateOrderSerializer,
     PlaceSerializer,
+    LikedOrdersSerializer,
 )
 
 User = get_user_model()
@@ -148,4 +150,35 @@ class PlaceView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class ListLikedOrders(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request, format=None):
+        liked_orders = Likes.objects.all()
+        return Response({'status': True, 'data': liked_orders}, status=status.HTTP_200_OK)
+
+class LikedOrdersView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, format=None):
+        
+        try:
+            user = self.request.user
+            liked_orders = Likes.objects.filter(user=user)
+            msg = {'staus': True, 'data': liked_orders.all()}
+            return Response(msg, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({'status': False, 'data': e}, status=status.HTTP_502_BAD_GATEWAY)
+
+    def post(self, request, format=None):
+        try:
+            serializer = LikedOrdersSerializer(data=request.data, context = {'user': request.user})
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response({'status': True, 'data': serializer.data}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'status': False, 'data': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
+            return Response({'status': False, 'data': f'Error {e}'}, status=status.HTTP_400_BAD_REQUEST)
     

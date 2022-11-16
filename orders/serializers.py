@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Order, OrderComment, Place, OrderImage
+from .models import Order, OrderComment, Place, OrderImage, Likes
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -65,3 +65,15 @@ class PlaceSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Place.objects.create(**validated_data)
+
+class LikedOrdersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Likes
+        fields = ['id', 'order', 'user']
+
+    def post(self, validated_data):
+        user = self.context['user']
+        order = validated_data.pop('order')
+
+        Likes.objects.create(user=user, order=order)
+        return validated_data

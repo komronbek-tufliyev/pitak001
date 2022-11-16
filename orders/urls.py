@@ -7,6 +7,8 @@ from .views import (
     OrderCreateView,
     OrderUpdateView,
     OrderDeleteView,
+    LikedOrdersView,
+    ListLikedOrders,
 )
 
 # OrderComment views
@@ -39,5 +41,7 @@ urlpatterns = [
     path('places/', PlaceList.as_view()),
     path('places/<int:pk>/', PlaceDetail.as_view()),    
     path('places/create/', PlaceView.as_view()),
+    path('orders/user/liked/', LikedOrdersView.as_view(), name='liked-order'),
+    path('orders/liked/', ListLikedOrders.as_view(), name='list-liked-orders'),
     
 ]

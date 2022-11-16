@@ -157,4 +157,11 @@ class OrderImage(models.Model):
 
     def __str__(self) -> str:
         return f"{self.pk} '+' {self.order.pk}. Media"
+
+class Likes(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"Liked order: {self.order.pk}, by {self.user.phone}"
     

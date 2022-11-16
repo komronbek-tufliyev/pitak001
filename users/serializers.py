@@ -41,7 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'phone', 'name', 'password', 'is_staff', 'is_active', 'is_superuser', )
+        fields = ('id', 'phone', 'name', 'password', 'is_staff', 'is_active', 'is_superuser', 'is_driver')
         extra_kwargs = {
             'password': {'write_only': True},
             'is_staff': {'read_only': True},
