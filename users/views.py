@@ -67,7 +67,10 @@ class ValidateOTPView(APIView):
             phone = phone.replace('+', '')
             phoneotp = PhoneOTP.objects.filter(phone=phone)
             user = User.objects.filter(phone=phone)
-            if not user.exists():
+            if not phoneotp.exists():
+                return Response({'message': 'Please send sms before validate'}, status=status.HTTP_204_NO_CONTENT)
+            
+            if not user.exists() and phoneotp.exists():
                 phoneotp = phoneotp.first()
                 user = user.first()
                 if phoneotp.otp == otp:
