@@ -77,11 +77,11 @@ class LikedOrdersSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         print("Context: ", self.context)
         print("Val data", validated_data)
-        user = self.context.get('user')
-        order = validated_data.pop('order')
-        user = validated_data.pop('user')
+        # user = self.context.get('user')
+        # order = validated_data.pop('order')
+        # user = validated_data.pop('user')
 
-        Likes.objects.create(user=user, order=order)
+        Likes.objects.create(**validated_data)
         return validated_data
     
     def save(self, **kwargs):

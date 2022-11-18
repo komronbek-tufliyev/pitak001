@@ -174,10 +174,25 @@ class LikedOrdersView(APIView):
     def post(self, request, order_id, format=None):
         order = get_object_or_404(Order, id=order_id)
         if order:
-            return Response({
-                'status': True,
-                'data': order,
-            })
+            data = {
+                'order': order.pk,
+                'user': self.request.user.pk
+            }
+            print("Data", data)
+            serializer = LikedOrdersSerializer(data=data, context={'user': self.request.user})
+            
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    return Response({
+                        'status': True, 
+                        'detail': 'serializer is valid',
+                    })
+            finally:
+                return Response({
+                        'status': True,
+                        'data': order,
+                    })
             
         return Response({
                 'status': False,

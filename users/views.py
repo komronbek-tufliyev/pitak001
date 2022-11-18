@@ -326,10 +326,10 @@ class APILogoutView(APIView):
             token: OutstandingToken
             for token in OutstandingToken.objects.filter(user=request.user):
                 _, _ = BlacklistedToken.objects.get_or_create(token=token)
-                print({"status": "OK, goodbye, all refresh tokens blacklisted"})
-            return Response({}, status=status.HTTP_205_RESET_CONTENT)
+                # print({"status": "OK, goodbye, all refresh tokens blacklisted"})
+            return Response({"status": "OK, goodbye, all refresh tokens blacklisted"}, status=status.HTTP_200_OK)
         refresh_token = self.request.data.get('refresh')
         token = RefreshToken(token=refresh_token)
         token.blacklist()
         print({"status": "OK, goodbye"})
-        return Response({}, status=status.HTTP_205_RESET_CONTENT)
+        return Response({"status": "OK, goodbye"}, status=status.HTTP_200_OK)

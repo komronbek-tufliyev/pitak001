@@ -42,6 +42,7 @@ urlpatterns = [
     path('places/<int:pk>/', PlaceDetail.as_view()),    
     path('places/create/', PlaceView.as_view()),
     path('orders/user/liked/', LikedOrdersView.as_view(), name='liked-order'),
+    path('orders/user/liked/<int:order_id>/', LikedOrdersView.as_view(), name='post-liked-order'),
     path('orders/liked/', ListLikedOrders.as_view(), name='list-liked-orders'),
     
 ]
