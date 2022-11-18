@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _ 
-# from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator
 from django.contrib.auth import get_user_model
 
 from users.models import User
@@ -60,6 +60,10 @@ class Order(models.Model):
 
     )
     _ORDER_ERROR_MESSAGE = _("Order error message")
+    # phone_regex = RegexValidator(regex=r'^998[0-9]{2}[0-9]{7}$', message=_("Faqat O'zbekiston raqamlari kiriting"))
+    # phone = models.CharField(_('phone number'), validators=[phone_regex], max_length=13, help_text=_('Phone number must be entered in the format: 9989XXXXXXXX'))
+    # phone2 = models.CharField(_('phone number2'), validators=[phone_regex], max_length=13, unique=True, help_text=_('Phone number must be entered in the format: 9989XXXXXXXX'), null=True, blank=True)
+
     name = models.CharField(_('name'), max_length=50, blank=True, null=True, help_text=_("Buyurtma nomi(kiritlishi shart emas), ixtiyoriy."))
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders', help_text=_("Buyurtmachi id'si"))
     car = models.CharField(_('car'), max_length=50, blank=True, null=True, help_text=_("Mashina nomi, M: Gentra"))
@@ -157,11 +161,3 @@ class OrderImage(models.Model):
 
     def __str__(self) -> str:
         return f"{self.pk} '+' {self.order.pk}. Media"
-
-class Likes(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    def __str__(self) -> str:
-        return f"Liked order: {self.order.pk}, by {self.user.phone}"
-    

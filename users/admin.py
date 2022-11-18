@@ -17,7 +17,7 @@ admin.site.register(SMSToken)
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'phone', 'is_driver', 'is_active', 'is_superuser']
+    list_display = ['id', 'name', 'phone', 'is_driver', 'is_active', 'is_superuser', 'get_favourites']
     list_filter = ['is_superuser', 'is_active', 'is_staff', 'is_driver']
     search_fields = ['phone', 'name']
 
@@ -25,15 +25,23 @@ class UserAdmin(admin.ModelAdmin):
         (None, {'fields': ('phone', 'password')}),
         ('Personal info', {'fields': ('name', 'is_driver', )}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',)}),
+        # ('Favourite Orders', {'fields': ('get_favourites',)}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('phone', 'password1', 'password2', 'is_active', 'is_staff', 'is_superuser', 'is_driver')}
+            'fields': ('phone', 'password1', 'password2', 'is_active', 'is_staff', 'is_superuser', 'is_driver', )}
         ),
     )
     filter_horizontal = []
+
+    def get_favourites(self, obj):
+        if obj.favourite.all():
+            return f"Order_ids: {list(obj.favourite.all().values_list('pk', flat=True))}"
+        else:
+            return 'No favourite orders'
+        # return self.favourite.pk
 
     
 admin.site.register(User, UserAdmin)

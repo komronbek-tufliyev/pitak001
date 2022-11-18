@@ -20,6 +20,9 @@ class User(AbstractBaseUser):
     device_token = models.CharField(max_length=255, null=True, blank=True, help_text=_("Qurilmaga berilgan token(shart emas)"))
     
     first_login = models.BooleanField(default=True, help_text=_("Birinchi marta login qilib kiryaptimi?"))
+
+    favourite = models.ManyToManyField('orders.Order', related_name='favourite_order')
+
     is_active = models.BooleanField(default=True, help_text=_("Faolmi (hozir ham ishlatyaptimi)?"))
     is_staff = models.BooleanField(default=False, help_text=_("Xodimmi?"))
     is_superuser = models.BooleanField(default=False, help_text=_("Super adminmi?"))

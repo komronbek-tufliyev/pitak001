@@ -13,7 +13,6 @@ from .models import (
     OrderComment,
     OrderImage,
     Place,
-    Likes,
 )
 
 from .serializers import (
@@ -21,7 +20,7 @@ from .serializers import (
     OrderCommentSerializer,
     CreateOrderSerializer,
     PlaceSerializer,
-    LikedOrdersSerializer,
+    FavouriteOrderSerializer,
 )
 
 User = get_user_model()
@@ -151,50 +150,54 @@ class PlaceView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ListLikedOrders(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    def get(self, request, format=None):
-        liked_orders = Likes.objects.all()
-        return Response({'status': True, 'data': liked_orders}, status=status.HTTP_200_OK)
-
-class LikedOrdersView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, pk, format=None):
-        
+ 
+class FavOrderView(APIView):
+    """
+        Favourite Order View has two methods: post and delete
+        # Post method addes user id to order.favourite m2m field
+        # Delete method removes user id from order.favourite m2m field 
+    """
+    def get(self, request):
+        user = request.user
+        queryset = User.objects.all()
+        print("fav orders", queryset)
         try:
-            user = self.request.user
-            liked_orders = Likes.objects.filter(user=user)
-            msg = {'status': True, 'data': liked_orders.all()}
-            return Response(msg, status=status.HTTP_200_OK)
-        except Exception as e:
-            print(e)
-            return Response({'status': False, 'data': e}, status=status.HTTP_502_BAD_GATEWAY)
 
-    def post(self, request, order_id, format=None):
-        order = get_object_or_404(Order, id=order_id)
-        if order:
-            data = {
-                'order': order.pk,
-                'user': self.request.user.pk
-            }
-            print("Data", data)
-            serializer = LikedOrdersSerializer(data=data, context={'user': self.request.user})
-            
-            try:
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save()
-                    return Response({
-                        'status': True, 
-                        'detail': 'serializer is valid',
-                    })
-            finally:
-                return Response({
-                        'status': True,
-                        'data': order,
-                    })
-            
-        return Response({
-                'status': False,
-                'data': 'Not found'
-            })
+            serializer = FavouriteOrderSerializer(queryset, many=True)
+            # if serializer.is_valid(raise_exception=True):
+            return Response({'status': True, 'detail': serializer.data}, status=status.HTTP_200_OK)
+            # return Response({'status': False, 'detail': serializer.errors}, status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            print("Error", e)
+            return Response({'status': False, 'detail': f"Error {e}"}, status=status.HTTP_204_NO_CONTENT)
+        # return Response({}) 
+
+    def post(self, request):
+        if 'order' in request.data:
+            order = get_object_or_404(Order, id=request.data.get('order'))
+            user = request.user
+            print("User", user)
+            print("User fav", user.favourite.all())
+            print("Order", order)
+            print("is Order in user.fav ", order in user.favourite.all())
+            if order and order not in user.favourite.all():
+                user.favourite.add(order)
+                return Response({'status': True, 'deatil': 'Order added to favourites'}, status=status.HTTP_201_CREATED)
+            print("Anaqa...", "error chiqdi bro")    
+        return Response({'status': False, 'detail': 'Something went wrong'})
+
+    def delete(self, request):
+        if 'order' in request.data:
+            user = request.user
+            order = get_object_or_404(Order, id=request.data.get('order'))
+            if order and order in user.favourites.all():
+                user.favourite.remove(order)
+                return Response({'status': True, 'detail': 'Order succesfully removed from favourites'}, status=status.HTTP_200_OK)
+
+            print("Aka xatolik chiqdi qanday aytay")
+
+        return Response({'status': False, 'detail': 'E karochi xatolik borde, kodingni to\'g\'irla keyin ishlayman'})
+
+
+
