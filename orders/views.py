@@ -5,6 +5,7 @@ from rest_framework import viewsets
 from drf_yasg.utils import swagger_auto_schema
 # from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.pagination import PageNumberPagination
 from django.utils.translation import gettext_lazy as _
 from .models import (
@@ -159,26 +160,26 @@ class ListLikedOrders(APIView):
 class LikedOrdersView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, format=None):
+    def get(self, request, pk, format=None):
         
         try:
             user = self.request.user
             liked_orders = Likes.objects.filter(user=user)
-            msg = {'staus': True, 'data': liked_orders.all()}
+            msg = {'status': True, 'data': liked_orders.all()}
             return Response(msg, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response({'status': False, 'data': e}, status=status.HTTP_502_BAD_GATEWAY)
 
-    def post(self, request, format=None):
-        try:
-            serializer = LikedOrdersSerializer(data=request.data, context = {'user': request.user})
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-                return Response({'status': True, 'data': serializer.data}, status=status.HTTP_201_CREATED)
-            else:
-                return Response({'status': False, 'data': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            print(e)
-            return Response({'status': False, 'data': f'Error {e}'}, status=status.HTTP_400_BAD_REQUEST)
-    
+    def post(self, request, order_id, format=None):
+        order = get_object_or_404(Order, id=order_id)
+        if order:
+            return Response({
+                'status': True,
+                'data': order,
+            })
+            
+        return Response({
+                'status': False,
+                'data': 'Not found'
+            })

@@ -67,13 +67,22 @@ class PlaceSerializer(serializers.ModelSerializer):
         return Place.objects.create(**validated_data)
 
 class LikedOrdersSerializer(serializers.ModelSerializer):
+    # id = serializers.IntegerField(required=False)
+    # order = serializers.CharField()
+    # user = serializers.CharField()
     class Meta:
         model = Likes
         fields = ['id', 'order', 'user']
 
-    def post(self, validated_data):
-        user = self.context['user']
+    def create(self, validated_data):
+        print("Context: ", self.context)
+        print("Val data", validated_data)
+        user = self.context.get('user')
         order = validated_data.pop('order')
+        user = validated_data.pop('user')
 
         Likes.objects.create(user=user, order=order)
         return validated_data
+    
+    def save(self, **kwargs):
+        return super().save(**kwargs)
