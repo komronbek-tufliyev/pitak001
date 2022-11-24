@@ -1,12 +1,15 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import viewsets
 from drf_yasg.utils import swagger_auto_schema
 # from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.pagination import PageNumberPagination
+# imort login_required
+from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext_lazy as _
 from .models import (
     Order,
@@ -21,6 +24,7 @@ from .serializers import (
     CreateOrderSerializer,
     PlaceSerializer,
     FavouriteOrderSerializer,
+    OrderUpdateSerializer,
 )
 
 User = get_user_model()
@@ -39,7 +43,7 @@ class OrderList(generics.ListAPIView):
 
 class OrderDetail(generics.RetrieveAPIView):
     queryset = Order.objects.prefetch_related('images')
-    serializer_class = OrderSerializer(queryset, many=True)
+    serializer_class = OrderSerializer
     http_method_names = ['get']
 
 class OrderCreateView(viewsets.ModelViewSet):
@@ -52,19 +56,54 @@ class OrderCreateView(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         
+        to_place_region = request.data.get('to_place')
+        to_place_district = request.data.get('to_place_district')
+        to_place_id = Place.objects.filter(region=to_place_region, district=to_place_district)
+        if to_place_id.exists():
+            to_place = to_place_id.first().pk
+        else:
+            to_place = Place.objects.create(region=to_place_region, district=to_place_district).pk
+        
+        request.data._mutable = True
+        request.data['to_place'] = to_place
+        request.data._mutable = False
         serializer = CreateOrderSerializer(data=request.data, context={'owner': request.user})
 
         if serializer.is_valid(raise_exception=True):
             serializer.save()
+            print("ser data", serializer.data)
             return Response({'detail':serializer.data, 'status': True}, status=status.HTTP_201_CREATED)
         # headers = self.get_success_headers(serializer.data)
         return Response({'detail': serializer.errors, 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class OrderUpdateView(generics.UpdateAPIView):
-    queryset = Order.objects.all()
+    queryset = Order.objects.prefetch_related('images')
     serializer_class = OrderSerializer
-    http_method_names = ['put']
+    http_method_names = ['put', 'patch']
+    lookup_field = 'pk'
 
     permission_classes = [permissions.IsAuthenticated]
+
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # to_place_region = request.data.get('to_place')
+        # to_place_district = request.data.get('to_place_district')
+
+        
+        # request.data._mutable = True
+        # request.data['to_place'] = to_place_id
+        # request.data._mutable = False
+
+        serializer = OrderUpdateSerializer(instance=instance, data=request.data, context={'owner': request.user},  partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({'detail':serializer.data, 'status': True, 'message': 'Order updated succesfully'}, status=status.HTTP_201_CREATED)
+        # headers = self.get_success_headers(serializer.data)
+        return Response({'detail': serializer.errors, 'status': False, 'message': 'Could not update order'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
 
 class OrderDeleteView(generics.DestroyAPIView):
     queryset = Order.objects.all()
@@ -82,7 +121,7 @@ class OrderCommentList(generics.ListAPIView):
 class OrderCommentDetail(generics.RetrieveAPIView):
     queryset = OrderComment.objects.all()
     serializer_class = OrderCommentSerializer
-    http_method_names = ['get']
+    http_method_names = ['get', 'put', 'patch', 'delete']
 
 class OrderCommentCreateView(generics.CreateAPIView):
     queryset = OrderComment.objects.all()
@@ -200,4 +239,38 @@ class FavOrderView(APIView):
         return Response({'status': False, 'detail': 'E karochi xatolik borde, kodingni to\'g\'irla keyin ishlayman'})
 
 
+@api_view(['GET'])
+# @permission_classes([permissions.IsAuthenticated])
+def show_filtered_orders(request, from_place, to_place, tuman):
+    print("from_place", from_place)
+    print("to_place", to_place)
+    print("tuman", tuman)
+    if from_place and to_place and tuman:
+        orders = Order.objects.filter(from_place=from_place, to_place__region=to_place, to_place__district=tuman)
+        print("orders", orders)
+        return Response({'status': True, 'detail': orders}, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def show_my_orders(request):
+    if request.method == 'GET':
+        if request.user:
+            orders = Order.objects.filter(owner=request.user)
+            if orders.exists():
+                orders = orders.all()
+                orders = ''
+                return Response({'status': True, 'data': orders}, status=status.HTTP_200_OK)
+            return Response({'status': True, 'detail': 'This user has no orders yet'}, status=status.HTTP_204_NO_CONTENT)
+    return Response({'status': False, 'detail': 'Can not retrieve any data about this user'}, status=status.HTTP_204_NO_CONTENT)
+
+
+class MyOrdersListView(generics.ListAPIView):
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        queryset = Order.objects.prefetch_related('images')
+
+        user = self.request.user 
+        if user is not None:
+            queryset = queryset.filter(owner=user)
+        return queryset

@@ -1,5 +1,7 @@
 from django.urls import path
 
+from .views import show_filtered_orders, show_my_orders
+
 # Order views
 from .views import (
     OrderList,
@@ -7,6 +9,7 @@ from .views import (
     OrderCreateView,
     OrderUpdateView,
     OrderDeleteView,
+
 )
 
 # OrderComment views
@@ -17,6 +20,11 @@ from .views import (
     OrderCommentUpdateView,
     OrderCommentDeleteView,
     FavOrderView,
+)
+
+# filtered data views 
+from .views import(
+    MyOrdersListView
 )
 
 # Places views
@@ -41,7 +49,10 @@ urlpatterns = [
     path('places/<int:pk>/', PlaceDetail.as_view()),    
     path('places/create/', PlaceView.as_view()),
     path('orders/favourite/', FavOrderView.as_view(), name='list-favourites'),
-    path('orders/favourite/add/', FavOrderView.as_view(), name='post-favourite'),
-    path('orders/favourite/delete/', FavOrderView.as_view(), name='delete-favourite'),
+    # path('orders/favourite/add/', FavOrderView.as_view(), name='post-favourite'),
+    # path('orders/favourite/delete/', FavOrderView.as_view(), name='delete-favourite'),
 
+    # filtered orders
+    path('orders/filter/<str:from_place>/<str:to_place>/<str:tuman>/', show_filtered_orders, name='show_filtered_orders'),
+    path('orders/my-orders/', MyOrdersListView.as_view(), name='my-orders'),
 ]

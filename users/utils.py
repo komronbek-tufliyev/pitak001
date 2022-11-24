@@ -12,10 +12,11 @@ def generate_otp() -> str:
     
 def send_sms(phone: str) -> str:
     key = generate_otp() # this is the OTP
-    message = f"Your OTP is {key}" # Write your own message here
+    message = f"Pitak...\nSizning bir martalik kirish kodingiz {key}" # Write your own message here
     if phone and message:
         try:
-            eskiz_conf.send_sms(message=message, phone=phone)
+            # eskiz_conf.send_sms(message=message, phone=phone)
+            # print("OTP:", key)
             return key
         except Exception as e:
             raise Exception("Can not send_sms")

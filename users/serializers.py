@@ -15,7 +15,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'phone', 'name', 'password', 'is_staff', 'is_active', 'is_superuser', )
+        fields = ('id', 'phone', 'phone2', 'name', 'password', 'image', 'is_staff', 'is_active', 'is_superuser', )
         extra_kwargs = {
             'password': {'write_only': True},
             'is_staff': {'read_only': True},
@@ -41,7 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'phone', 'name', 'password', 'is_staff', 'is_active', 'is_superuser', 'is_driver')
+        fields = ('id', 'phone', 'phone2', 'name', 'password', 'is_staff', 'is_active', 'is_superuser', 'is_driver')
         extra_kwargs = {
             'password': {'write_only': True},
             'is_staff': {'read_only': True},
@@ -52,6 +52,8 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.phone = validated_data.get('phone', instance.phone)
         instance.name = validated_data.get('name', instance.name)
+        instance.phone2 = validated_data.get('phone2', instance.phone2)
+        instance.image = validated_data.get('image', instance.image)
         instance.password = validated_data.get('password', instance.password)
         instance.is_driver = validated_data.get('is_driver', instance.is_driver)
         instance.save()
@@ -120,7 +122,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User 
-        fields = ['phone', 'name', 'is_driver']
+        fields = ['name', 'phone', 'phone2', 'image', 'is_driver']
         extra_kwargs = {
             'password': {'write_only': True},
         }
@@ -155,13 +157,17 @@ class CreateUserSerializer(serializers.ModelSerializer):
             self.validate(validated_data)
             print("Val data", validated_data)
             phone = validated_data.pop('phone').replace('+', '')
+            phone2 = validated_data.pop('phone2', None)
+            if phone2:
+                phone2 = phone2.replace('+', '')
+            image = validated_data.pop('image', None)
             phoneotp = PhoneOTP.objects.filter(phone=phone)
             if phoneotp.exists():
                 password = phoneotp.first().otp
             else:
                 raise serializers.ValidationError("Can not create user, because phoneotp does not exist")
             print("validated")
-            user = User.objects.create(phone=phone, password=password, **validated_data)
+            user = User.objects.create(phone=phone, password=password, phone2=phone2, image=image, **validated_data)
             user.set_password(password)
             user.save()
             print("User: ", user, user.password)

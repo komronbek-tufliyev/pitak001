@@ -17,6 +17,7 @@ class User(AbstractBaseUser):
 
     name = models.CharField(_('name'), max_length=50, blank=True, null=True, help_text=_("To'liq ism. M: Falonchiyev Pistonchi"))
     is_driver = models.BooleanField(default=False, help_text=_("Haydovchimi"))
+    image = models.ImageField(upload_to='users/', null=True, blank=True)
     device_token = models.CharField(max_length=255, null=True, blank=True, help_text=_("Qurilmaga berilgan token(shart emas)"))
     
     first_login = models.BooleanField(default=True, help_text=_("Birinchi marta login qilib kiryaptimi?"))

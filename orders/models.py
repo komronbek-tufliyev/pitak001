@@ -28,11 +28,11 @@ class Place(models.Model):
         ('Xorazm', 'Xorazm'),
 
     )
-    name = models.CharField(max_length=50, verbose_name=_('Place Name'), help_text=_("Joy nomi. M: Yunusobod"))
+    district = models.CharField(max_length=50, verbose_name=_('Place Name'), help_text=_("Tuman nomi. M: Yunusobod"), blank=True, null=True)
     region = models.CharField(max_length=100, verbose_name=_('Region'), choices=REGION_CHOICES, help_text=_("Viloyat nomi, 14ta tanlov bor."))
 
     def __str__(self) -> str:
-        return self.name
+        return self.district
 
     class Meta:
         verbose_name = _('Place')
@@ -66,17 +66,20 @@ class Order(models.Model):
 
     name = models.CharField(_('name'), max_length=50, blank=True, null=True, help_text=_("Buyurtma nomi(kiritlishi shart emas), ixtiyoriy."))
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders', help_text=_("Buyurtmachi id'si"))
+    phone2 = models.CharField(_('phone number2'), max_length=13, help_text=_('Faqat o\'zbek raqamlari'), null=True, blank=True)
     car = models.CharField(_('car'), max_length=50, blank=True, null=True, help_text=_("Mashina nomi, M: Gentra"))
     car_number = models.CharField(_('car_number'), max_length=50, blank=True, null=True, help_text=_("Mashina raqami(shart emas), ixtiyoriy"))
     description = models.TextField(_('description'), blank=True, null=True, help_text=_("Buyurtma haqida qo'shimcha izoh"))
     # from_place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='from_place')
     # to_place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='to_place')
     from_place = models.CharField(max_length=100, verbose_name=_('From Place'), choices=REGION_CHOICES, help_text=_("Joy nomi, qayerdan..."))
-    to_place = models.CharField(max_length=100, verbose_name=_('To Place'), choices=REGION_CHOICES, help_text=_("Joy nomi, qayerga..."))
+    # to_place = models.CharField(max_length=100, verbose_name=_('To Place'), choices=REGION_CHOICES, help_text=_("Joy nomi, qayerga..."))
+    to_place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='to_place', help_text=_("Joy nomi, qayerga..."))
     date = models.DateField(_('date'), blank=True, null=True, help_text=_("Buyurtma vaqti(ketish vaqti) YYYY-MM-DD. M: 2022-12-25"))
     price = models.IntegerField(_('price'), blank=True, null=True, help_text=_("Narxi"))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_driver = models.BooleanField(default=False, help_text=_("Buyurtmani beruvchi shaxs haydovchi bo'lsa True, aks holda False"))
     is_active = models.BooleanField(default=True)
     is_accepted = models.BooleanField(default=False, help_text=_("Status: qabul qilinganmi"))
     is_finished = models.BooleanField(default=False, help_text=_("Status: bajarilganmi"))
@@ -88,13 +91,13 @@ class Order(models.Model):
         if self.name:
             return self.name
         else:
-            return self.owner.phone + ' ' + self.from_place + ' ' + self.to_place
+            return self.owner.phone + ' ' + self.from_place + ' ' + str(self.to_place.pk)
 
     def get_order_short_info(self) -> str:
         return self.name
 
     def get_order_full_info(self) -> str:
-        return self.name + ' Car: ' + self.car + ' owner: ' + self.owner.phone + 'from: ' + self.from_place + 'to: ' + self.to_place
+        return self.name + ' Car: ' + self.car + ' owner: ' + self.owner.phone + 'from: ' + self.from_place + 'to: ' + str(self.to_place.pk)
     
     def get_order_owner(self) -> str:
         return self.owner
@@ -126,7 +129,7 @@ class Order(models.Model):
         return self.from_place
 
     def sort_by_to_place(self):
-        return self.to_place
+        return self.to_place.pk
 
     def sort_by_owner(self):
         return self.owner.phone

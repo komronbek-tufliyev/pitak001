@@ -116,14 +116,14 @@ class SendOTPView(APIView):
         serializer.is_valid(raise_exception=True)
         phone = serializer.data.get('phone')
         try:
-            print(phone, "Phone edi")
+            # print(phone, "Phone edi")
             phone = phone.replace('+', '')
-            print("Phone esa ", phone)
+            # print("Phone esa ", phone)
             key = send_sms(phone)
             print("Key: ", key)
             phone_otp = PhoneOTP.objects.filter(phone=phone)
             if phone_otp.exists():
-                print("Phone otp exists and phone is", phone_otp)
+                # print("Phone otp exists and phone is", phone_otp)
                 phone_otp = phone_otp.first()
                 phone_otp.otp = key
                 phone_otp.is_verified = False
@@ -168,8 +168,11 @@ class RegisterView(generics.CreateAPIView):
                         'name': name,
                         'is_driver': is_driver
                     }
-                    print("Dict: ", data)
-                    serializer = CreateUserSerializer(data=data, context={'request': request})
+                    request.data._mutable = True
+                    request.data['phone']=phone
+                    request.data._mutable = False
+                    print("Dict: ", request.data)
+                    serializer = CreateUserSerializer(data=request.data, context={'request': request})
                     serializer.is_valid(raise_exception=True)
                     user = serializer.save()
                     token = get_tokens_for_user(user)
@@ -194,12 +197,12 @@ class LoginView(APIView):
 
     @swagger_auto_schema(request_body=LoginSerializer)
     def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return Response({'message': 'User already logged in'}, status=status.HTTP_400_BAD_REQUEST)
+        # if request.user.is_authenticated:
+        #     return Response({'message': 'User already logged in'}, status=status.HTTP_400_BAD_REQUEST)
         phone = request.data.get('phone')
-        password = request.data.get('password')
+        # password = request.data.get('password')
         refresh_token = request.GET.get('refresh')
-        if phone and password:
+        if phone:
             phone = phone.replace('+', '')
             phoneotp = PhoneOTP.objects.filter(phone=phone)
             if phoneotp.exists():
@@ -209,7 +212,7 @@ class LoginView(APIView):
                     if user.exists():
                         user = user.first()
                         print("User exists", user)
-                        print("User checked_password = ", user.check_password(password))
+                        # print("User checked_password = ", user.check_password(password))
                         # if not refresh_token:
                         #     refresh_token = RefreshToken()
                         # request.data._mutable = True
@@ -218,19 +221,21 @@ class LoginView(APIView):
                         # serializer = LoginSerializer(data=request.data)
                         # serializer.is_valid(raise_exception=True)
                         # token = get_tokens_for_user(user)
+                        password = str(phoneotp.otp)
                         if user.check_password(password):
                             token = get_tokens_for_user(user)
-                            return Response({'message': 'User logged in succesfully', 'token': token}, status=status.HTTP_200_OK)
+                            user = UserSerializer(user, context={'request': request}).data
+                            return Response({'message': 'User logged in succesfully', 'token': token, 'user': user}, status=status.HTTP_200_OK)
                         else:
                             return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
                     else:
-                        return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({'message': 'Invalid credentials, user does not exist'}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     return Response({'message': 'Please verify OTP first'}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({'message': 'Please verify OTP first'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'message': 'Phone and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Phone is required'}, status=status.HTTP_400_BAD_REQUEST)
 
     # @swagger_auto_schema(request_body=LoginSerializer)
     # def post(self, request, *args, **kwargs):
