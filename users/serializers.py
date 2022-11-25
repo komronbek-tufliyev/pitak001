@@ -166,7 +166,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
             else:
                 raise serializers.ValidationError("Can not create user, because phoneotp does not exist")
             print("validated")
-            user = User.objects.create(phone=phone, password=password, phone2=phone2, image=image, **validated_data)
+            user = User.objects.create(phone=phone, password=password, phone2=phone2, **validated_data)
             user.set_password(password)
             user.save()
             print("User: ", user, user.password)
