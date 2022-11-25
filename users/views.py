@@ -60,47 +60,50 @@ class ValidateOTPView(APIView):
     @swagger_auto_schema(request_body=ValidateOTPSerializer)
     def post(self, request, *args, **kwargs):
         serializer = ValidateOTPSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        phone = serializer.data.get('phone')
-        otp = serializer.data.get('otp')
-        print(f"otp {otp}, phone {phone}")
-        if phone and otp:
-            phone = phone.replace('+', '')
-            print(f"otp {otp}, phone {phone}")
-            phoneotp = PhoneOTP.objects.filter(phone=phone)
-            user = User.objects.filter(phone=phone)
-            print(f"phone otp {phoneotp}, user {user}")
-            if not phoneotp.exists():
-                print("phone otp does not exists in not phoneotp.exists()")
-                return Response({'message': 'Please send sms before validate'}, status=status.HTTP_204_NO_CONTENT)
-            
-            if not user.exists() and phoneotp.exists():
-                print("I'm in not user.exists() and phoneotp.exists() if statement")
-                phoneotp = phoneotp.first()
-                # user = user.first()
-                if phoneotp.otp == otp:
-                    phoneotp.is_verified = True
-                    phoneotp.save()
-                    return Response({'message': 'OTP verified succesfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
- 
-            if phoneotp.exists() and user.exists():
-                print("Phoneotp.exists() and user.exists()")
-                phoneotp = phoneotp.first()
-                user = user.first()
-                if phoneotp.otp == otp:
-                    print("phone otp otp otp", otp)
-                    phoneotp.is_verified = True
-                    phoneotp.save()
+        if serializer.is_valid(raise_exception=True):
 
-                    user.set_password(otp)
-                    user.save()
-                    return Response({'message': 'OTP verified succesfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
+            phone = serializer.data.get('phone', None)
+            otp = serializer.data.get('otp', None)
+            print(f"otp {otp}, phone {phone}")
+            if phone and otp:
+                phone = phone.replace('+', '')
+                print(f"otp {otp}, phone {phone}")
+                phoneotp = PhoneOTP.objects.filter(phone=phone)
+                user = User.objects.filter(phone=phone)
+                print(f"phone otp {phoneotp}, user {user}")
+                if not phoneotp.exists():
+                    print("phone otp does not exists in not phoneotp.exists()")
+                    return Response({'message': 'Please send sms before validate'}, status=status.HTTP_204_NO_CONTENT)
+                
+                if not user.exists() and phoneotp.exists():
+                    print("I'm in not user.exists() and phoneotp.exists() if statement")
+                    phoneotp = phoneotp.first()
+                    # user = user.first()
+                    if phoneotp.otp == otp:
+                        phoneotp.is_verified = True
+                        phoneotp.save()
+                        return Response({'message': 'OTP verified succesfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
+    
+                if phoneotp.exists() and user.exists():
+                    print("Phoneotp.exists() and user.exists()")
+                    phoneotp = phoneotp.first()
+                    user = user.first()
+                    if phoneotp.otp == otp:
+                        print("phone otp otp otp", otp)
+                        phoneotp.is_verified = True
+                        phoneotp.save()
+
+                        user.set_password(otp)
+                        user.save()
+                        return Response({'message': 'OTP verified succesfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
                 else:
-                    return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'message': "Something went wrong while validating otp"}, status=status.HTTP_102_PROCESSING)
             else:
-                return Response({'message': "Something went wrong while validating otp"}, status=status.HTTP_102_PROCESSING)
+                return Response({'message': 'Invalid phone number'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'message': 'Invalid phone number'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': serializer.errors}, status=status.HTTP_502_BAD_GATEWAY)
 
 
 class SendOTPView(APIView):
@@ -161,23 +164,25 @@ class RegisterView(generics.CreateAPIView):
             phone = phone.replace('+', '')
             phoneotp = PhoneOTP.objects.filter(phone=phone)
             if phoneotp.exists():
+                print("shitty code ", phoneotp)
                 phoneotp = phoneotp.first()
                 if phoneotp.is_verified:
-                    name = None 
-                    is_driver = False
-                    if 'name' in request.data:
-                        name = request.data.get('name')
-                    if 'is_driver' in request.data:
-                        is_driver = request.data.get('is_driver')
-                    data: dict = {
-                        'phone': phone,
-                        'password': phoneotp.otp,
-                        'name': name,
-                        'is_driver': is_driver
-                    }
-                    request.data._mutable = True
-                    request.data['phone']=phone
-                    request.data._mutable = False
+                    print("Shitty otp is verified and doing nothing", phoneotp.is_verified)
+                    # name = None 
+                    # is_driver = False
+                    # if 'name' in request.data:
+                    #     name = request.data.get('name')
+                    # if 'is_driver' in request.data:
+                    #     is_driver = request.data.get('is_driver')
+                    # data: dict = {
+                    #     'phone': phone,
+                    #     'password': phoneotp.otp,
+                    #     'name': name,
+                    #     'is_driver': is_driver
+                    # }
+                    # request.data._mutable = True
+                    # request.data['phone']=phone
+                    # request.data._mutable = False
                     print("Dict: ", request.data)
                     serializer = CreateUserSerializer(data=request.data, context={'request': request})
                     serializer.is_valid(raise_exception=True)
