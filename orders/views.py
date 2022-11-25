@@ -59,23 +59,33 @@ class OrderCreateView(viewsets.ModelViewSet):
         
         to_place_region = request.data.get('to_place')
         to_place_district = request.data.get('to_place_district')
-        to_place_id = Place.objects.filter(region=to_place_region, district=to_place_district)
-        if to_place_id.exists():
-            to_place = to_place_id.first().pk
-        else:
-            to_place = Place.objects.create(region=to_place_region, district=to_place_district).pk
-        
-        request.POST._mutable = True
-        request.data['to_place'] = to_place
-        request.POST._mutable = False
-        serializer = CreateOrderSerializer(data=request.data, context={'owner': request.user})
+        # if not to_place and to_place_district:
+        #     msg = {'detail': 'to_place is required'}
+        # elif not to_place_district and to_place:
+        #     msg = {'detail': 'to_place_district is required'}
+        # elif not to_place and not to_place_district:
+        #     msg = {'detail': 'to_place and to_place_district is required'}
+        if to_place and to_place_district:
 
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            print("ser data", serializer.data)
-            return Response({'detail':serializer.data, 'status': True}, status=status.HTTP_201_CREATED)
-        # headers = self.get_success_headers(serializer.data)
-        return Response({'detail': serializer.errors, 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+            to_place_id = Place.objects.filter(region=to_place_region, district=to_place_district)
+            if to_place_id.exists():
+                to_place = to_place_id.first().pk
+            else:
+                to_place = Place.objects.create(region=to_place_region, district=to_place_district).pk
+            
+            request.POST._mutable = True
+            request.data['to_place'] = to_place
+            request.POST._mutable = False
+            serializer = CreateOrderSerializer(data=request.data, context={'owner': request.user})
+
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                print("ser data", serializer.data)
+                return Response({'detail':serializer.data, 'status': True}, status=status.HTTP_201_CREATED)
+            # headers = self.get_success_headers(serializer.data)
+            return Response({'detail': serializer.errors, 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'detail': 'to_place and to_place_district are required'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderUpdateView(generics.UpdateAPIView):
