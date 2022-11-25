@@ -200,9 +200,9 @@ class LoginView(APIView):
         # if request.user.is_authenticated:
         #     return Response({'message': 'User already logged in'}, status=status.HTTP_400_BAD_REQUEST)
         phone = request.data.get('phone')
-        # password = request.data.get('password')
+        password = request.data.get('password')
         refresh_token = request.GET.get('refresh')
-        if phone:
+        if phone and password:
             phone = phone.replace('+', '')
             phoneotp = PhoneOTP.objects.filter(phone=phone)
             if phoneotp.exists():
@@ -221,7 +221,6 @@ class LoginView(APIView):
                         # serializer = LoginSerializer(data=request.data)
                         # serializer.is_valid(raise_exception=True)
                         # token = get_tokens_for_user(user)
-                        password = str(phoneotp.otp)
                         if user.check_password(password):
                             token = get_tokens_for_user(user)
                             user = UserSerializer(user, context={'request': request}).data
@@ -235,7 +234,7 @@ class LoginView(APIView):
             else:
                 return Response({'message': 'Please verify OTP first'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'message': 'Phone is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Phone and password are required'}, status=status.HTTP_400_BAD_REQUEST)
 
     # @swagger_auto_schema(request_body=LoginSerializer)
     # def post(self, request, *args, **kwargs):
