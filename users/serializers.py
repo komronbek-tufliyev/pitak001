@@ -156,6 +156,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
             self.validate(validated_data)
             print("Val data", validated_data)
             phone = validated_data.pop('phone').replace('+', '')
+            print("Serializerdagi tel", phone)
             phone2 = validated_data.pop('phone2', None)
             if phone2:
                 phone2 = phone2.replace('+', '')
@@ -164,6 +165,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
             if phoneotp.exists():
                 password = phoneotp.first().otp
                 user = User.objects.create(phone=phone, password=password, phone2=phone2, **validated_data)
+                print("Usr created da aka")
                 user.set_password(password)
                 user.save()
                 print("User: ", user, user.password)
