@@ -77,7 +77,7 @@ class ValidateOTPView(APIView):
             if not user.exists() and phoneotp.exists():
                 print("I'm in not user.exists() and phoneotp.exists() if statement")
                 phoneotp = phoneotp.first()
-                user = user.first()
+                # user = user.first()
                 if phoneotp.otp == otp:
                     phoneotp.is_verified = True
                     phoneotp.save()
@@ -247,25 +247,6 @@ class LoginView(APIView):
         else:
             return Response({'message': 'Phone and password are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # @swagger_auto_schema(request_body=LoginSerializer)
-    # def post(self, request, *args, **kwargs):
-    #     serializer = LoginSerializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     phone = serializer.data.get('phone')
-    #     password = serializer.data.get('password')
-    #     user = User.objects.get(phone=phone)
-    #     if user.check_password(password):
-    #         token = get_tokens_for_user(user)
-    #         return Response({'message': 'User logged in succesfully', 'token': token}, status=status.HTTP_200_OK)
-    #         # return Response({'message': 'User logged in succesfully'}, status=status.HTTP_200_OK)
-    #     else:
-    #         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-
-               
-
-# Path: users\serializers.py
-# Compare this snippet from users\models.py:
-#
 
 class UsersListView(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,  )
