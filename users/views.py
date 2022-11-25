@@ -183,10 +183,10 @@ class RegisterView(generics.CreateAPIView):
                     #     'name': name,
                     #     'is_driver': is_driver
                     # }
-                    # request.data._mutable = True
-                    # request.data['phone']=phone
-                    # request.data._mutable = False
-                    print("Dict: ", request.data)
+                    request.POST._mutable = True
+                    request.data['phone']=phone
+                    request.POST._mutable = False
+                    print("Dict: ", request.data)   
                     serializer = CreateUserSerializer(data=request.data, context={'request': request})
                     if serializer.is_valid(raise_exception=True):
 
@@ -197,6 +197,7 @@ class RegisterView(generics.CreateAPIView):
                             'detail': serializer.data,
                             'token': token,
                         }
+                        print("msg", msg)
                         return Response(msg, status=status.HTTP_201_CREATED)
                     else:
                         return Response({'mesage': "Bo'mayaptiku aka "}, status=status.HTTP_400_BAD_REQUEST)
