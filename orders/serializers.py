@@ -30,6 +30,23 @@ class OrderCommentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return OrderComment.objects.create(**validated_data)
 
+class CreateOrderDisplaySerializer(serializers.ModelSerializer):
+    images = OrderImageSerializer(many=True, read_only=True,)
+    uploaded_images = serializers.ListField(
+        child = serializers.ImageField(max_length = 1000000, allow_empty_file = False, use_url = False),
+        write_only = True,
+        required=False,
+    )
+
+    to_place = serializers.CharField()
+    to_place_district = serializers.CharField()
+
+    class Meta:
+        model = Order 
+        ref_name = 'Order display'
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'to_place_district', 'price', 'date', 'description', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        extra_kwargs = {"owner": {"read_only": True}}
+
 class CreateOrderSerializer(serializers.ModelSerializer):
     images = OrderImageSerializer(many=True, read_only=True,)
     uploaded_images = serializers.ListField(

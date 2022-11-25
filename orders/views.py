@@ -25,6 +25,7 @@ from .serializers import (
     PlaceSerializer,
     FavouriteOrderSerializer,
     OrderUpdateSerializer,
+    CreateOrderDisplaySerializer
 )
 
 User = get_user_model()
@@ -53,7 +54,7 @@ class OrderCreateView(viewsets.ModelViewSet):
     # parser_classes = (MultiPartParser, FormParser)
 
     permission_classes = [permissions.IsAuthenticated]
-
+    @swagger_auto_schema(request_body=CreateOrderDisplaySerializer)
     def create(self, request, *args, **kwargs):
         
         to_place_region = request.data.get('to_place')
@@ -64,9 +65,9 @@ class OrderCreateView(viewsets.ModelViewSet):
         else:
             to_place = Place.objects.create(region=to_place_region, district=to_place_district).pk
         
-        request.data._mutable = True
+        request.POST._mutable = True
         request.data['to_place'] = to_place
-        request.data._mutable = False
+        request.POST._mutable = False
         serializer = CreateOrderSerializer(data=request.data, context={'owner': request.user})
 
         if serializer.is_valid(raise_exception=True):
