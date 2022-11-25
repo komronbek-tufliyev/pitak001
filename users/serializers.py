@@ -72,7 +72,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 class ValidateSendOTPSerializer(serializers.Serializer):
     phone = serializers.CharField(max_length=13, allow_null=False, min_length=13, help_text=_("Telefon raqam: 998XX123ZZYY"))
-    def validate_phone(self, phone, otp):
+    def validate_phone(self, phone):
         if not phone:
             raise serializers.ValidationError('Phone number is required')
         
