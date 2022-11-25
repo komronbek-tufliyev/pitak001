@@ -80,9 +80,12 @@ class ValidateOTPView(APIView):
                     phoneotp = phoneotp.first()
                     # user = user.first()
                     if phoneotp.otp == otp:
+                        print("shitty otp is here", phoneotp.otp)
                         phoneotp.is_verified = True
                         phoneotp.save()
                         return Response({'message': 'OTP verified succesfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({'message': 'Anaqa'}, status=status.HTTP_400_BAD_REQUEST)
     
                 if phoneotp.exists() and user.exists():
                     print("Phoneotp.exists() and user.exists()")
@@ -180,9 +183,9 @@ class RegisterView(generics.CreateAPIView):
                     #     'name': name,
                     #     'is_driver': is_driver
                     # }
-                    # request.data._mutable = True
-                    # request.data['phone']=phone
-                    # request.data._mutable = False
+                    request.data._mutable = True
+                    request.data['phone']=phone
+                    request.data._mutable = False
                     print("Dict: ", request.data)
                     serializer = CreateUserSerializer(data=request.data, context={'request': request})
                     serializer.is_valid(raise_exception=True)
