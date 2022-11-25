@@ -188,15 +188,18 @@ class RegisterView(generics.CreateAPIView):
                     # request.data._mutable = False
                     print("Dict: ", request.data)
                     serializer = CreateUserSerializer(data=request.data, context={'request': request})
-                    serializer.is_valid(raise_exception=True)
-                    user = serializer.save()
-                    token = get_tokens_for_user(user)
-                    msg = {
-                        'message': 'User registered succesfully',
-                        'detail': serializer.data,
-                        'token': token,
-                    }
-                    return Response(msg, status=status.HTTP_201_CREATED)
+                    if serializer.is_valid(raise_exception=True):
+
+                        user = serializer.save()
+                        token = get_tokens_for_user(user)
+                        msg = {
+                            'message': 'User registered succesfully',
+                            'detail': serializer.data,
+                            'token': token,
+                        }
+                        return Response(msg, status=status.HTTP_201_CREATED)
+                    else:
+                        return Response({'mesage': "Bo'mayaptiku aka "}, status=status.HTTP_400_BAD_REQUEST)
 
                 else:
                     return Response({'message': 'Please verify OTP first'}, status=status.HTTP_400_BAD_REQUEST)
