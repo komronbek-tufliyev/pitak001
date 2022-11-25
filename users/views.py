@@ -201,12 +201,15 @@ class LoginView(APIView):
         #     return Response({'message': 'User already logged in'}, status=status.HTTP_400_BAD_REQUEST)
         phone = request.data.get('phone')
         password = request.data.get('password')
-        refresh_token = request.GET.get('refresh')
+        # refresh_token = request.GET.get('refresh')
+        if 'refresh' in request.data:
+            refresh_token = request.data.get('refresh')
         if phone and password:
             phone = phone.replace('+', '')
             phoneotp = PhoneOTP.objects.filter(phone=phone)
             if phoneotp.exists():
                 phoneotp = phoneotp.first()
+                print("phone otp bor")
                 if phoneotp.is_verified:
                     user = User.objects.filter(phone=phone)
                     if user.exists():
@@ -223,6 +226,7 @@ class LoginView(APIView):
                         # token = get_tokens_for_user(user)
                         if user.check_password(password):
                             token = get_tokens_for_user(user)
+                            print("Token", token)
                             user = UserSerializer(user, context={'request': request}).data
                             return Response({'message': 'User logged in succesfully', 'token': token, 'user': user}, status=status.HTTP_200_OK)
                         else:

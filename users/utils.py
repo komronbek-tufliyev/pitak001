@@ -15,7 +15,7 @@ def send_sms(phone: str) -> str:
     message = f"Pitak...\nSizning bir martalik kirish kodingiz {key}" # Write your own message here
     if phone and message:
         try:
-            eskiz_conf.send_sms(message=message, phone=phone)
+            # eskiz_conf.send_sms(message=message, phone=phone)
             # print("OTP:", key)
             return key
         except Exception as e:
