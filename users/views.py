@@ -63,14 +63,19 @@ class ValidateOTPView(APIView):
         serializer.is_valid(raise_exception=True)
         phone = serializer.data.get('phone')
         otp = serializer.data.get('otp')
+        print(f"otp {otp}, phone {phone}")
         if phone and otp:
             phone = phone.replace('+', '')
+            print(f"otp {otp}, phone {phone}")
             phoneotp = PhoneOTP.objects.filter(phone=phone)
             user = User.objects.filter(phone=phone)
+            print(f"phone otp {phoneotp}, user {user}")
             if not phoneotp.exists():
+                print("phone otp does not exists in not phoneotp.exists()")
                 return Response({'message': 'Please send sms before validate'}, status=status.HTTP_204_NO_CONTENT)
             
             if not user.exists() and phoneotp.exists():
+                print("I'm in not user.exists() and phoneotp.exists() if statement")
                 phoneotp = phoneotp.first()
                 user = user.first()
                 if phoneotp.otp == otp:
@@ -79,9 +84,11 @@ class ValidateOTPView(APIView):
                     return Response({'message': 'OTP verified succesfully. Now you can register/login phone'}, status=status.HTTP_200_OK)
  
             if phoneotp.exists() and user.exists():
+                print("Phoneotp.exists() and user.exists()")
                 phoneotp = phoneotp.first()
                 user = user.first()
                 if phoneotp.otp == otp:
+                    print("phone otp otp otp", otp)
                     phoneotp.is_verified = True
                     phoneotp.save()
 
