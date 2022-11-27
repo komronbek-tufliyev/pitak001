@@ -38,33 +38,33 @@ class UserSerializer(serializers.ModelSerializer):
 class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'phone', 'phone2', 'name', 'password', 'is_active', 'is_driver')
+        fields = ('id', 'phone', 'phone2', 'name', 'password', 'is_active', 'is_driver', 'image')
         extra_kwargs = {
-            'password': {'write_only': True},
-            'is_staff': {'read_only': True},
-            'is_active': {'read_only': True},
-            'is_superuser': {'read_only': True},
-        }
+            'password': {'write_only': True}
+        }    
 
     def update(self, instance, validated_data):
+        
         instance.phone = validated_data.get('phone', instance.phone)
-        instance.name = validated_data.get('name', instance.name)
         instance.phone2 = validated_data.get('phone2', instance.phone2)
+        instance.name = validated_data.get('name', instance.name)
         instance.image = validated_data.get('image', instance.image)
-        instance.password = validated_data.get('password', instance.password)
         instance.is_driver = validated_data.get('is_driver', instance.is_driver)
+        instance.is_active = validated_data.get('is_active', instance.is_active)
         instance.save()
         return instance
 
-    def validate_password(self, password):
-        if not password:
-            raise serializers.ValidationError('Password is required')
-        return password
+
+
+    # def validate_password(self, password):
+    #     if not password:
+    #         raise serializers.ValidationError('Password is required')
+    #     return password
     
-    def validate_phone(self, phone):
-        if not phone:
-            raise serializers.ValidationError('Phone is required')
-        return phone    
+    # def validate_phone(self, phone):
+    #     if not phone:
+    #         raise serializers.ValidationError('Phone is required')
+    #     return phone    
 
 
 class ValidateSendOTPSerializer(serializers.Serializer):

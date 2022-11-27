@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import show_filtered_orders, show_my_orders
+# from .views import show_filtered_orders, show_my_orders
 
 # Order views
 from .views import (
@@ -14,11 +14,11 @@ from .views import (
 
 # OrderComment views
 from .views import (
-    OrderCommentList,
-    OrderCommentDetail,
-    OrderCommentCreateView,
-    OrderCommentUpdateView,
-    OrderCommentDeleteView,
+    # OrderCommentList,
+    # OrderCommentDetail,
+    # OrderCommentCreateView,
+    # OrderCommentUpdateView,
+    # OrderCommentDeleteView,
     FavOrderView,
 )
 
@@ -27,6 +27,8 @@ from .views import(
     MyOrdersListView,
     Orders4DriverView,
     Orders4NonDriverView,
+    FilteredOrders4DriverView,
+    FilteredOrders4NonDriverView,
 )
 
 # Places views
@@ -54,11 +56,14 @@ urlpatterns = [
     # path('orders/favourite/add/', FavOrderView.as_view(), name='post-favourite'),
     # path('orders/favourite/delete/', FavOrderView.as_view(), name='delete-favourite'),
 
-    # filtered orders by place
-    path('orders/filter/<str:from_place>/<str:to_place>/<str:tuman>/', show_filtered_orders, name='show_filtered_orders'),
+    # show my orders
     path('orders/my-orders/', MyOrdersListView.as_view(), name='my-orders'),
 
     # Filtered orders by is_driver
     path('orders/for-driver/', Orders4DriverView.as_view(), name='orders-for-driver'),
     path('orders/for-non-driver/', Orders4NonDriverView.as_view(), name='orders-for-non-driver'),
+
+    # filter by place
+    path('orders/for-driver/filter/<str:from_place>/<str:to_place>/<str:to_place_district>/', FilteredOrders4DriverView.as_view(), name='orders-for-driver'),
+    path('orders/for-non-driver/<str:from_place>/<str:to_place>/<str:to_place_district>/', FilteredOrders4NonDriverView.as_view(), name='orders-for-non-driver'), 
 ]

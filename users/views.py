@@ -283,11 +283,29 @@ class UpdateUserView(generics.UpdateAPIView):
     http_method_names = ['put', 'patch']
 
     def get_object(self):
-        return self.request.user
+        return self.request.user    
 
+    def partial_update(self, request, *args, **kwargs):     
+        instance = self.get_object()   
+        if 'phone2' in request.data:
+            # request.data._mutable = True
+            request.data.update({'phone2': request.data.get('phone2').replace('+', '')})
+            # request.data._mutable = False
+
+        serializer = UpdateUserSerializer(instance, data=request.data, context={'user': self.request.user}, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({'message': 'User updated', 'detail': serializer.data}, status=status.HTTP_200_OK)
+        return Response({'message': serializer.error_messages}, status=status.HTTP_400_BAD_REQUEST)
     
-
-
+    # def update(self, request, *args, **kwargs):
+    #     instance = self.get_object()   
+    #     serializer = UpdateUserSerializer(instance, data=request.data)
+    #     if serializer.is_valid(raise_exception=True):
+    #         serializer.save()
+    #         return Response({'message': 'User updated', 'detail': serializer.data}, status=status.HTTP_200_OK)
+    #     return Response({'message': serializer.error_messages}, status=status.HTTP_400_BAD_REQUEST)
+    
 class DeleteUserView(generics.DestroyAPIView):
     permission_classes = (permissions.IsAuthenticated,  )
     serializer_class = UserSerializer

@@ -306,4 +306,28 @@ class Orders4NonDriverView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Order.objects.prefetch_related('images').prefetch_related('to_place').filter(is_driver=False)
         return queryset
-        
+
+class FilteredOrders4DriverView(generics.ListAPIView):
+    pagination_class = MyPagination
+    serializer_class = OrderSerializer
+
+    def get_queryset(self, from_place, to_place, to_place_district):
+        to_place_id = Place.objects.filter(to_place=to_place, to_place_district=to_place_district)
+        if to_place_id.exists():
+            to_place_id = to_place_id.first()
+            queryset = Order.objects.filter(is_driver=True).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
+            return queryset
+        return {}
+
+
+class FilteredOrders4NonDriverView(generics.ListAPIView):
+    pagination_class = MyPagination
+    serializer_class = OrderSerializer
+
+    def get_queryset(self, from_place, to_place, to_place_district):
+        to_place_id = Place.objects.filter(to_place=to_place, to_place_district=to_place_district)
+        if to_place_id.exists():
+            to_place_id = to_place_id.first()
+            queryset = Order.objects.filter(is_driver=False).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
+            return queryset
+        return {}
