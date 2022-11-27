@@ -22,9 +22,11 @@ from .views import (
     FavOrderView,
 )
 
-# filtered data views 
+# filtered order views 
 from .views import(
-    MyOrdersListView
+    MyOrdersListView,
+    Orders4DriverView,
+    Orders4NonDriverView,
 )
 
 # Places views
@@ -52,7 +54,11 @@ urlpatterns = [
     # path('orders/favourite/add/', FavOrderView.as_view(), name='post-favourite'),
     # path('orders/favourite/delete/', FavOrderView.as_view(), name='delete-favourite'),
 
-    # filtered orders
+    # filtered orders by place
     path('orders/filter/<str:from_place>/<str:to_place>/<str:tuman>/', show_filtered_orders, name='show_filtered_orders'),
     path('orders/my-orders/', MyOrdersListView.as_view(), name='my-orders'),
+
+    # Filtered orders by is_driver
+    path('orders/for-driver/', Orders4DriverView.as_view(), name='orders-for-driver'),
+    path('orders/for-non-driver/', Orders4NonDriverView.as_view(), name='orders-for-non-driver'),
 ]
