@@ -288,8 +288,10 @@ class UpdateUserView(generics.UpdateAPIView):
     def partial_update(self, request, *args, **kwargs):     
         instance = self.get_object()   
         if 'phone2' in request.data:
+            phone2 = request.data.get('phone2').replace('+', '')
+            if len(phone2) == 12:
             # request.data._mutable = True
-            request.data.update({'phone2': request.data.get('phone2').replace('+', '')})
+                request.data.update({'phone2': phone2})
             # request.data._mutable = False
 
         serializer = UpdateUserSerializer(instance, data=request.data, context={'user': self.request.user}, partial=True)
