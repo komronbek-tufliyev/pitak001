@@ -289,10 +289,15 @@ class UpdateUserView(generics.UpdateAPIView):
         instance = self.get_object()   
         if 'phone2' in request.data:
             phone2 = request.data.get('phone2').replace('+', '')
+            print(len(phone2))
             if len(phone2) == 12:
             # request.data._mutable = True
                 request.data.update({'phone2': phone2})
             # request.data._mutable = False
+        if 'phone' in request.data:
+            phone = request.data.get('phone').replace('+', '')
+            if len(phone) == 12:
+                request.data.update({'phone': phone})
 
         serializer = UpdateUserSerializer(instance, data=request.data, context={'user': self.request.user}, partial=True)
         if serializer.is_valid(raise_exception=True):

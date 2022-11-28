@@ -46,8 +46,10 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         
         instance.phone = validated_data.get('phone', instance.phone)
-        if len(validated_data.get('phone2', instance.phone2)) == 12:
+        if validated_data.get('phone2', instance.phone2):
             instance.phone2 = validated_data.get('phone2', instance.phone2)
+        if validated_data.get('phone', instance.phone) == 12:
+            instance.phone = validated_data.get('phone', instance.phone)
         instance.name = validated_data.get('name', instance.name)
         instance.image = validated_data.get('image', instance.image)
         instance.is_driver = validated_data.get('is_driver', instance.is_driver)
