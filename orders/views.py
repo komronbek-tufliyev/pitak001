@@ -99,7 +99,7 @@ class OrderUpdateView(generics.UpdateAPIView):
 
     permission_classes = [permissions.IsAuthenticated]
 
-
+    @swagger_auto_schema(request_body=CreateOrderDisplaySerializer)
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         # to_place_region = request.data.get('to_place')
