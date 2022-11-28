@@ -162,11 +162,12 @@ class CreateUserSerializer(serializers.ModelSerializer):
             image = validated_data.pop('image', None)
             is_driver = validated_data.pop('is_driver', False)
             phoneotp = PhoneOTP.objects.filter(phone=phone)
+            name = validated_data.get('name', None)
             if phoneotp.exists():
                 password = phoneotp.first().otp
                 if '+' in phone:
                     phone = phone.replace('+', '')
-                user = User.objects.create(phone=phone, password=password, phone2=phone2, image=image, is_driver=is_driver)
+                user = User.objects.create(phone=phone, password=password, phone2=phone2, image=image, is_driver=is_driver, name=name)
                 print("Usr created da aka")
                 user.set_password(password)
                 user.save()
