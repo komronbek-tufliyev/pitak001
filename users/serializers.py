@@ -44,11 +44,9 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         }    
 
     def update(self, instance, validated_data):
-        
-        instance.phone = validated_data.get('phone', instance.phone)
-        if validated_data.get('phone2', instance.phone2):
+        if 'phone2' in validated_data and validated_data.get('phone2'):
             instance.phone2 = validated_data.get('phone2', instance.phone2)
-        if validated_data.get('phone', instance.phone) == 12:
+        if 'phone' in validated_data and validated_data.get('phone'):
             instance.phone = validated_data.get('phone', instance.phone)
         instance.name = validated_data.get('name', instance.name)
         instance.image = validated_data.get('image', instance.image)
