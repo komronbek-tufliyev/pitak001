@@ -287,7 +287,7 @@ class UpdateUserView(generics.UpdateAPIView):
 
     def partial_update(self, request, *args, **kwargs):     
         instance = self.get_object()  
-        if ('phone' in request.data and not request.data.get('phone') ) or ('phone2' in request.data and not request.data.get('phone2')):
+        if ('phone' in request.data and not request.data.get('phone')):
             return Response({'message': 'Phone field can not be empty'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             if 'phone2' in request.data:
@@ -296,7 +296,7 @@ class UpdateUserView(generics.UpdateAPIView):
                 # request.data._mutable = True
                     request.data.update({'phone2': phone2})
                 # request.data._mutable = False
-            if 'phone' in request.data:
+            if 'phone' in request.data and request.data.get('phone2'):
                 phone = request.data.get('phone').replace('+', '')
                 if len(phone) == 12:
                     request.data.update({'phone': phone})
