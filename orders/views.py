@@ -314,7 +314,7 @@ class Orders4DriverView(generics.ListAPIView):
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        queryset = Order.objects.prefetch_related('images').prefetch_related('to_place').filter(is_driver=True)
+        queryset = Order.objects.prefetch_related('images').prefetch_related('to_place').filter(is_driver=False)
         return queryset
 
 class Orders4NonDriverView(generics.ListAPIView):
@@ -322,7 +322,7 @@ class Orders4NonDriverView(generics.ListAPIView):
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        queryset = Order.objects.prefetch_related('images').prefetch_related('to_place').filter(is_driver=False)
+        queryset = Order.objects.prefetch_related('images').prefetch_related('to_place').filter(is_driver=True)
         return queryset
 
 class FilteredOrders4DriverView(generics.ListAPIView):
