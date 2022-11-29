@@ -189,3 +189,6 @@ SMS_CONFIG = {
     'email': env.str('ESKIZ_EMAIL'), # your Eskiz email
     'password': env.str('ESKIZ_PASSWORD'), # your eskiz password
 }
+
+SMS_ENABLED = env.bool('SMS_ENABLED', default=True)
+
