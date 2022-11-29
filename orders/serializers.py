@@ -126,6 +126,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         owner = self.context.get('owner')
         uploaded_images = validated_data.pop('uploaded_images', None)
         instance.from_place = validated_data.get('from_place', instance.from_place)
+        # if to_place:
         instance.to_place = validated_data.get('to_place', instance.to_place)
         instance.car = validated_data.get('car', instance.car)
         instance.car_number = validated_data.get('car_number', instance.car_number)

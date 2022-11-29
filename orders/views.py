@@ -116,6 +116,17 @@ class OrderUpdateView(generics.UpdateAPIView):
             request.POST._mutable = True
             request.data['to_place'] = to_place
             request.POST._mutable = False
+        elif to_place_region and not to_place_district:
+            return Response({'detail': 'to_place_district is required'}, status=status.HTTP_400_BAD_REQUEST)
+        elif not to_place_region and to_place_district:
+            to_place_id = Place.objects.filter(district=to_place_district, region=instance.to_place.region)
+            if to_place_id.exists():
+                to_place = to_place_id.first().pk
+            else:
+                to_place = Place.objects.create(region=instance.to_place.region, district=to_place_district).pk
+            request.POST._mutable = True
+            request.data['to_place'] = to_place
+            request.POST._mutable = False
         
         serializer = OrderUpdateSerializer(instance=instance, data=request.data, context={'owner': request.user},  partial=True)
         if serializer.is_valid(raise_exception=True):
