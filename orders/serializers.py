@@ -125,28 +125,8 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         print("Validated data", validated_data)
         owner = self.context.get('owner')
         uploaded_images = validated_data.pop('uploaded_images', None)
-        to_place = validated_data.pop('to_place', None)
-        to_place_district = validated_data.pop('to_place_district', None)
-        if to_place and to_place_district:
-            try:
-                to_place = Place.objects.get(region=to_place, district=to_place_district).pk
-                print("To place", to_place)
-            except Place.DoesNotExist:
-                to_place = Place.objects.create(region=to_place, district=to_place_district).pk
-                print("To place", to_place)
-
-        elif not to_place and to_place_district:
-            try:
-                to_place, created = Place.objects.get_or_create(region=instance.to_place.region, district=to_place_district)
-                to_place = to_place.pk
-                print("To place", to_place)
-                print("To place created", created)
-            except:
-                raise serializers.ValidationError("Can not get or create to_place")
-        elif not to_place and not to_place_district:
-            to_place = instance.to_place 
-        instance.to_place = to_place
         instance.from_place = validated_data.get('from_place', instance.from_place)
+        instance.to_place = validated_data.get('to_place', instance.to_place)
         instance.car = validated_data.get('car', instance.car)
         instance.car_number = validated_data.get('car_number', instance.car_number)
         instance.date = validated_data.get('date', instance.date)

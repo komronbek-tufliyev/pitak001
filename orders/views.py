@@ -102,14 +102,21 @@ class OrderUpdateView(generics.UpdateAPIView):
     @swagger_auto_schema(request_body=CreateOrderDisplaySerializer)
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        # to_place_region = request.data.get('to_place')
-        # to_place_district = request.data.get('to_place_district')
-
+        phone2 = request.data.get('phone2', None)
+        if phone2:
+            request.data['phone2'] = phone2.replace('+', '')
+        to_place_region = request.data.get('to_place', None)
+        to_place_district = request.data.get('to_place_district', None)
+        if to_place_region and to_place_district:
+            to_place_id = Place.objects.filter(region=to_place_region, district=to_place_district)
+            if to_place_id.exists():
+                to_place = to_place_id.first().pk
+            else:
+                to_place = Place.objects.create(region=to_place_region, district=to_place_district).pk
+            request.POST._mutable = True
+            request.data['to_place'] = to_place
+            request.POST._mutable = False
         
-        # request.data._mutable = True
-        # request.data['to_place'] = to_place_id
-        # request.data._mutable = False
-
         serializer = OrderUpdateSerializer(instance=instance, data=request.data, context={'owner': request.user},  partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
