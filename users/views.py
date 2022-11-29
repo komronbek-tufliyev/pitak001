@@ -293,13 +293,13 @@ class UpdateUserView(generics.UpdateAPIView):
             request.data['phone2'] = request.data['phone2'].replace('+', '')
         return super().update(request, *args, **kwargs)
 
-    def partial_update(self, request, *args, **kwargs):
-        # replace number + with empty string in request.data
-        if 'phone' in request.data:
-            request.data['phone'] = request.data['phone'].replace('+', '')
-        if 'phone2' in request.data:
-            request.data['phone2'] = request.data['phone2'].replace('+', '')
-        return super().partial_update(request, *args, **kwargs)
+    # def partial_update(self, request, *args, **kwargs):
+    #     # replace number + with empty string in request.data
+    #     if 'phone' in request.data:
+    #         request.data['phone'] = request.data['phone'].replace('+', '')
+    #     if 'phone2' in request.data:
+    #         request.data['phone2'] = request.data['phone2'].replace('+', '')
+    #     return super().partial_update(request, *args, **kwargs)
     
     
 

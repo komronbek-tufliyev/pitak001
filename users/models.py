@@ -13,7 +13,7 @@ class User(AbstractBaseUser):
 
     phone_regex = RegexValidator(regex=r'^998[0-9]{2}[0-9]{7}$', message=_("Faqat O'zbekiston raqamlari kiriting"))
     phone = models.CharField(_('phone number'), validators=[phone_regex], max_length=13, unique=True, help_text=_('Phone number must be entered in the format: 9989XXXXXXXX'))
-    phone2 = models.CharField(_('phone number2'), validators=[phone_regex], max_length=13, unique=True, help_text=_('Phone number must be entered in the format: 9989XXXXXXXX'), null=True, blank=True)
+    phone2 = models.CharField(_('phone number2'), validators=[phone_regex], max_length=13, help_text=_('Phone number must be entered in the format: 9989XXXXXXXX'), null=True, blank=True)
 
     name = models.CharField(_('name'), max_length=50, blank=True, null=True, help_text=_("To'liq ism. M: Falonchiyev Pistonchi"))
     is_driver = models.BooleanField(default=False, help_text=_("Haydovchimi"))
