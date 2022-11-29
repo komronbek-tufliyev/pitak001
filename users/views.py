@@ -324,7 +324,11 @@ class DeleteUserView(generics.DestroyAPIView):
 
     def get_object(self):
         return self.request.user
-
+    
+    def delete(self, request, *args, **kwargs):
+        self.destroy(request, *args, **kwargs)
+        return Response({'message': 'User deleted succesfully'}, status=status.HTTP_200_OK)
+ 
 class LogoutView(APIView):
     permission_classes = (permissions.IsAuthenticated, )
     serializer_class = LogoutSerializer
