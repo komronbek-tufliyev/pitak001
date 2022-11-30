@@ -156,6 +156,10 @@ class OrderDeleteView(generics.DestroyAPIView):
 
     permission_classes = [permissions.IsAuthenticated]
 
+    def delete(self, request, *args, **kwargs):
+        super().delete(request, *args, **kwargs)
+        return Response({'detail': 'Order deleted succesfully'}, status=status.HTTP_200_OK) 
+
 class OrderCommentList(generics.ListAPIView):
     queryset = OrderComment.objects.all()
     serializer_class = OrderCommentSerializer
