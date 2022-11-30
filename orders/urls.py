@@ -29,6 +29,7 @@ from .views import(
     Orders4NonDriverView,
     FilteredOrders4DriverView,
     FilteredOrders4NonDriverView,
+    FilterByRegionView,
 )
 
 # Places views
@@ -50,7 +51,8 @@ urlpatterns = [
     # path('orders/<int:pk>/comments/<int:comment_pk>/update/', OrderCommentUpdateView.as_view()),
     # path('orders/<int:pk>/comments/<int:comment_pk>/delete/', OrderCommentDeleteView.as_view()),
     path('places/', PlaceList.as_view()),
-    path('places/<int:pk>/', PlaceDetail.as_view()),    
+    path('places/<int:pk>/', PlaceDetail.as_view()), 
+    path('places/<str:region>/', FilterByRegionView.as_view(), name='filter-by-region'), 
     path('places/create/', PlaceView.as_view()),
     path('orders/favourite/', FavOrderView.as_view(), name='list-favourites'),
     # path('orders/favourite/add/', FavOrderView.as_view(), name='post-favourite'),

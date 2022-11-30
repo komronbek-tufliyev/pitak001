@@ -233,6 +233,14 @@ class PlaceView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class FilterByRegionView(generics.ListAPIView):
+    queryset = Place.objects.all()
+    serializer_class = PlaceSerializer
+    http_method_names = ['get']
+
+    def get_queryset(self, region):
+        queryset = Place.objects.filter(region=region).all()
+        return queryset
  
 class FavOrderView(APIView):
     """
