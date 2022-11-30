@@ -24,6 +24,7 @@ from .serializers import (
     CreateOrderSerializer,
     PlaceSerializer,
     FavouriteOrderSerializer,
+    DisplayFavOrderSerializer,
     OrderUpdateSerializer,
     CreateOrderDisplaySerializer
 )
@@ -73,7 +74,9 @@ class OrderCreateView(viewsets.ModelViewSet):
             if to_place_id.exists():
                 to_place = to_place_id.first().pk
             else:
-                to_place = Place.objects.create(region=to_place_region, district=to_place_district).pk
+                return Response({'detail': f'Bunday id-ga ega manzil topilmadi, id: yo\'q chunki manzilni o\'zi yo\'q'}, status=status.HTTP_400_BAD_REQUEST)
+            # else:
+            #     to_place = Place.objects.create(region=to_place_region, district=to_place_district).pk
             
             request.POST._mutable = True
             request.data['to_place'] = to_place
@@ -111,22 +114,31 @@ class OrderUpdateView(generics.UpdateAPIView):
             to_place_id = Place.objects.filter(region=to_place_region, district=to_place_district)
             if to_place_id.exists():
                 to_place = to_place_id.first().pk
+                request.POST._mutable = True
+                request.data['to_place'] = to_place
+                request.POST._mutable = False
             else:
-                to_place = Place.objects.create(region=to_place_region, district=to_place_district).pk
-            request.POST._mutable = True
-            request.data['to_place'] = to_place
-            request.POST._mutable = False
-        elif to_place_region and not to_place_district:
-            return Response({'detail': 'to_place_district is required'}, status=status.HTTP_400_BAD_REQUEST)
-        elif not to_place_region and to_place_district:
-            to_place_id = Place.objects.filter(district=to_place_district, region=instance.to_place.region)
-            if to_place_id.exists():
-                to_place = to_place_id.first().pk
-            else:
-                to_place = Place.objects.create(region=instance.to_place.region, district=to_place_district).pk
-            request.POST._mutable = True
-            request.data['to_place'] = to_place
-            request.POST._mutable = False
+                return Response({'status': False, 'detail': f'Bunday manzil topilmadi, To place exists: {to_place_id.exists()}'}, status=status.HTTP_400_BAD_REQUEST)
+        # if to_place_region and to_place_district:
+        #     to_place_id = Place.objects.filter(region=to_place_region, district=to_place_district)
+        #     if to_place_id.exists():
+        #         to_place = to_place_id.first().pk
+        #     else:
+        #         to_place = Place.objects.create(region=to_place_region, district=to_place_district).pk
+        #     request.POST._mutable = True
+        #     request.data['to_place'] = to_place
+        #     request.POST._mutable = False
+        # elif to_place_region and not to_place_district:
+        #     return Response({'detail': 'to_place_district is required'}, status=status.HTTP_400_BAD_REQUEST)
+        # elif not to_place_region and to_place_district:
+        #     to_place_id = Place.objects.filter(district=to_place_district, region=instance.to_place.region)
+        #     if to_place_id.exists():
+        #         to_place = to_place_id.first().pk
+        #     else:
+        #         to_place = Place.objects.create(region=instance.to_place.region, district=to_place_district).pk
+        #   request.POST._mutable = True
+        #   request.data['to_place'] = to_place
+        #   request.POST._mutable = False
         
         serializer = OrderUpdateSerializer(instance=instance, data=request.data, context={'owner': request.user},  partial=True)
         if serializer.is_valid(raise_exception=True):
@@ -230,70 +242,52 @@ class FavOrderView(APIView):
     """
     def get(self, request):
         user = request.user
-        queryset = User.objects.all()
-        print("fav orders", queryset)
+        print("fav orders", user)
         try:
 
-            serializer = FavouriteOrderSerializer(queryset, many=True)
-            # if serializer.is_valid(raise_exception=True):
+            serializer = FavouriteOrderSerializer(user)
             return Response({'status': True, 'detail': serializer.data}, status=status.HTTP_200_OK)
-            # return Response({'status': False, 'detail': serializer.errors}, status=status.HTTP_204_NO_CONTENT)
 
         except Exception as e:
             print("Error", e)
             return Response({'status': False, 'detail': f"Error {e}"}, status=status.HTTP_204_NO_CONTENT)
-        # return Response({}) 
-
+   
+    @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
     def post(self, request):
-        if 'order' in request.data:
-            order = get_object_or_404(Order, id=request.data.get('order'))
+        if 'id' in request.data:
+            order = get_object_or_404(Order, id=request.data.get('id'))
             user = request.user
             print("User", user)
             print("User fav", user.favourite.all())
             print("Order", order)
             print("is Order in user.fav ", order in user.favourite.all())
-            if order and order not in user.favourite.all():
-                user.favourite.add(order)
-                return Response({'status': True, 'deatil': 'Order added to favourites'}, status=status.HTTP_201_CREATED)
-            print("Anaqa...", "error chiqdi bro")    
-        return Response({'status': False, 'detail': 'Something went wrong'})
-
+            if order in user.favourite.all():
+                return Response({'status': False, 'detail': 'Order already in favourite'}, status=status.HTTP_200_OK)   
+            serializer = FavouriteOrderSerializer(data=request.data, context={'user': user, 'order': order})
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response({'status': True, 'detail': serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({'status': False, 'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+           
+        print("Anaqa...", "error chiqdi bro")    
+        return Response({'status': False, 'message': 'E karochi xatolik borde, kodingni to\'g\'irla keyin ishlayman'})
+    
+    @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
     def delete(self, request):
-        if 'order' in request.data:
+        if 'id' in request.data:
             user = request.user
-            order = get_object_or_404(Order, id=request.data.get('order'))
-            if order and order in user.favourites.all():
+            order = get_object_or_404(Order, id=request.data.get('id'))
+            if order and order in user.favourite.all():
                 user.favourite.remove(order)
+                user.save()
                 return Response({'status': True, 'detail': 'Order succesfully removed from favourites'}, status=status.HTTP_200_OK)
-
-            print("Aka xatolik chiqdi qanday aytay")
+            else:
+                return Response({'status': False, 'detail': 'Order not found'}, status=status.HTTP_400_BAD_REQUEST)
+            # return Response({'status': False, 'detail': 'Order not found'}, status=status.HTTP_400_BAD_REQUEST)
+        print("Aka xatolik chiqdi qanday aytay")
 
         return Response({'status': False, 'detail': 'E karochi xatolik borde, kodingni to\'g\'irla keyin ishlayman'})
 
-
-@api_view(['GET'])
-# @permission_classes([permissions.IsAuthenticated])
-def show_filtered_orders(request, from_place, to_place, tuman):
-    print("from_place", from_place)
-    print("to_place", to_place)
-    print("tuman", tuman)
-    if from_place and to_place and tuman:
-        orders = Order.objects.filter(from_place=from_place, to_place__region=to_place, to_place__district=tuman)
-        print("orders", orders)
-        return Response({'status': True, 'detail': orders}, status=status.HTTP_200_OK)
-
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
-def show_my_orders(request):
-    if request.method == 'GET':
-        if request.user:
-            orders = Order.objects.filter(owner=request.user)
-            if orders.exists():
-                orders = orders.all()
-                orders = ''
-                return Response({'status': True, 'data': orders}, status=status.HTTP_200_OK)
-            return Response({'status': True, 'detail': 'This user has no orders yet'}, status=status.HTTP_204_NO_CONTENT)
-    return Response({'status': False, 'detail': 'Can not retrieve any data about this user'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class MyOrdersListView(generics.ListAPIView):

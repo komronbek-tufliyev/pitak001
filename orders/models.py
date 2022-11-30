@@ -28,11 +28,11 @@ class Place(models.Model):
         ('Xorazm', 'Xorazm'),
 
     )
-    district = models.CharField(max_length=50, verbose_name=_('Place Name'), help_text=_("Tuman nomi. M: Yunusobod"), blank=True, null=True)
-    region = models.CharField(max_length=100, verbose_name=_('Region'), choices=REGION_CHOICES, help_text=_("Viloyat nomi, 14ta tanlov bor."))
+    region = models.CharField(max_length=100, verbose_name=_('Viloyat'), choices=REGION_CHOICES, help_text=_("Viloyat nomi, 14ta tanlov bor."))
+    district = models.CharField(max_length=50, verbose_name=_('Tuman'), help_text=_("Tuman nomi. M: Yunusobod"), blank=True, null=True)
 
     def __str__(self) -> str:
-        return self.district
+        return self.region + ', ' + self.district[::3]
 
     class Meta:
         verbose_name = _('Place')

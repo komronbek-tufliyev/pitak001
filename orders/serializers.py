@@ -67,16 +67,16 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         print("Validated data", validated_data)
         owner = self.context.get('owner')
         uploaded_images = validated_data.pop('uploaded_images', None)
-        to_place = validated_data.pop('to_place', None)
-        to_place_district = validated_data.pop('to_place_district', None)
-        if to_place and to_place_district:
-            try:
-                to_place = Place.objects.get(region=to_place, district=to_place_district)
-            except Place.DoesNotExist:
-                to_place = Place.objects.create(region=to_place, district=to_place_district)
+        # to_place = validated_data.pop('to_place', None)
+        # to_place_district = validated_data.pop('to_place_district', None)
+        # if to_place and to_place_district:
+        #     try:
+        #         to_place = Place.objects.get(region=to_place, district=to_place_district)
+        #     except Place.DoesNotExist:
+        #         to_place = Place.objects.create(region=to_place, district=to_place_district)
         new_order = Order.objects.create(
             owner=owner,
-            to_place=to_place,
+            # to_place=to_place,
             **validated_data
         )
         print("New order", new_order)
@@ -122,11 +122,10 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         extra_kwargs = {"owner": {"read_only": True}}
 
     def update(self, instance, validated_data):
-        print("Validated data", validated_data)
+        # print("Validated data", validated_data)
         owner = self.context.get('owner')
         uploaded_images = validated_data.pop('uploaded_images', None)
         instance.from_place = validated_data.get('from_place', instance.from_place)
-        # if to_place is not None:
         instance.to_place = validated_data.get('to_place', instance.to_place)
         instance.car = validated_data.get('car', instance.car)
         instance.car_number = validated_data.get('car_number', instance.car_number)
@@ -153,8 +152,21 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
 
 
 class FavouriteOrderSerializer(serializers.ModelSerializer):
-    favourite = OrderSerializer(many=True)
+    favourite = OrderSerializer(many=True, read_only=True)
     class Meta:
         model = User
         fields = ['id', 'favourite']
 
+    def create(self, validated_data):
+        user = self.context.get('user')
+        order = self.context.get('order')
+        if order:
+            if order not in user.favourite.all():
+                user.favourite.add(order)
+                return user
+        return user
+    
+
+class DisplayFavOrderSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    

@@ -11,12 +11,24 @@ from django.contrib.auth.models import Group
 
 
 # Register your models here.
+class PlaceAdmin(admin.ModelAdmin):
+    list_display = ('id', 'region', 'district',)
+    search_fields = ('region', 'district', )
+    list_filter = ('region', 'district', )
+    list_per_page = 25
 
+admin.site.register(Place, PlaceAdmin)
 
 admin.site.register(Order)
-admin.site.register(OrderComment)
-admin.site.register(OrderImage)
-admin.site.register(Place)
+# admin.site.register(OrderComment)
+class OrderImageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'order', 'image')
+    search_fields = ('order', 'image', )
+    list_filter = ('order', 'image', )
+    list_per_page = 25
+
+
+admin.site.register(OrderImage, OrderImageAdmin)
 admin.site.unregister(Group)
 # admin.site.register(Likes)
 
