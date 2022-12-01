@@ -26,7 +26,8 @@ from .serializers import (
     FavouriteOrderSerializer,
     DisplayFavOrderSerializer,
     OrderUpdateSerializer,
-    CreateOrderDisplaySerializer
+    CreateOrderDisplaySerializer,
+    FilterByPlaceSerializer,
 )
 
 User = get_user_model()
@@ -224,10 +225,10 @@ class PlaceDetail(generics.RetrieveAPIView):
 
 class PlaceView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    def get(self, request, format=None):
-        places = Place.objects.all()
-        serializer = PlaceSerializer(places, many=True)
-        return Response(serializer.data)
+    # def get(self, request, format=None):
+    #     places = Place.objects.all()
+    #     serializer = PlaceSerializer(places, many=True)
+    #     return Response(serializer.data)
 
     @swagger_auto_schema(request_body=PlaceSerializer)
     def post(self, request, format=None):
@@ -244,10 +245,11 @@ class FilterByRegionView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        region_by = self.request.GET.get('region',  None)
+        region_by = self.kwargs['region']
         if region_by:
-            return Place.objects.filter(region=region_by).all()
+            queryset =  Place.objects.filter(region=region_by).all()
         return queryset
+
 class FavOrderView(APIView):
     """
         Favourite Order View has two methods: post and delete
@@ -344,14 +346,17 @@ class FilteredOrders4DriverView(generics.ListAPIView):
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        to_place = self.request.GET.get('to_place', None)
-        to_place_district = self.request.GET.get('to_place_district', None)
-        from_place = self.request.GET.get('from_place', None)
-        if to_place and from_place and to_place_district:
-            to_place_id = Place.objects.filter(to_place=to_place, to_place_district=to_place_district)
-            if to_place_id.exists():
-                to_place_id = to_place_id.first()
-                queryset = Order.objects.filter(is_driver=True).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
+        to_place_district = self.kwargs.get('to_place_district', None)
+        to_place_region = self.kwargs.get('to_place_region', None)
+        from_place = self.kwargs.get('from_place', None)
+        if to_place_region and from_place and to_place_district:
+            if to_place_region and from_place and to_place_district:
+                to_place_id = Place.objects.filter(region=to_place_region).filter(district=to_place_district)
+                if to_place_id.exists():
+                    to_place_id = to_place_id.first()
+                    
+                    queryset = Order.objects.filter(is_driver=False).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
+
         return queryset
 
 
@@ -363,12 +368,15 @@ class FilteredOrders4NonDriverView(generics.ListAPIView):
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        to_place = self.request.GET.get('to_place', None)
-        to_place_district = self.request.GET.get('to_place_district', None)
-        from_place = self.request.GET.get('from_place', None)
-        if to_place and from_place and to_place_district:
-            to_place_id = Place.objects.filter(to_place=to_place, to_place_district=to_place_district)
-            if to_place_id.exists():
-                to_place_id = to_place_id.first()
-                queryset = Order.objects.filter(is_driver=True).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
+        to_place_district = self.kwargs.get('to_place_district', None)
+        to_place_region = self.kwargs.get('to_place_region', None)
+        from_place = self.kwargs.get('from_place', None)
+        if to_place_region and from_place and to_place_district:
+            if to_place_region and from_place and to_place_district:
+                to_place_id = Place.objects.filter(region=to_place_region).filter(district=to_place_district)
+                if to_place_id.exists():
+                    to_place_id = to_place_id.first()
+                    
+                    queryset = Order.objects.filter(is_driver=True).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
+
         return queryset

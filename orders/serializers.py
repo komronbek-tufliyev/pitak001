@@ -15,6 +15,9 @@ class PlaceSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return Place.objects.create(**validated_data)
 
+class FilterByPlaceSerializer(serializers.Serializer):
+    region = serializers.CharField(required=True)
+
 class OrderImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderImage
