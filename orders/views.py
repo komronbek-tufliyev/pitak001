@@ -242,10 +242,12 @@ class FilterByRegionView(generics.ListAPIView):
     serializer_class = PlaceSerializer
     http_method_names = ['get']
 
-    def get_queryset(self, region):
-        queryset = Place.objects.filter(region=region).all()
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        region_by = self.request.GET.get('region',  None)
+        if region_by:
+            return Place.objects.filter(region=region_by).all()
         return queryset
- 
 class FavOrderView(APIView):
     """
         Favourite Order View has two methods: post and delete
@@ -335,23 +337,33 @@ class FilteredOrders4DriverView(generics.ListAPIView):
     pagination_class = MyPagination
     serializer_class = OrderSerializer
 
-    def get_queryset(self, from_place, to_place, to_place_district):
-        to_place_id = Place.objects.filter(to_place=to_place, to_place_district=to_place_district)
-        if to_place_id.exists():
-            to_place_id = to_place_id.first()
-            queryset = Order.objects.filter(is_driver=True).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
-            return queryset
-        return {}
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        to_place = self.request.GET.get('to_place', None)
+        to_place_district = self.request.GET.get('to_place_district', None)
+        from_place = self.request.GET.get('from_place', None)
+        if to_place and from_place and to_place_district:
+            to_place_id = Place.objects.filter(to_place=to_place, to_place_district=to_place_district)
+            if to_place_id.exists():
+                to_place_id = to_place_id.first()
+                queryset = Order.objects.filter(is_driver=True).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
+        return queryset
 
 
 class FilteredOrders4NonDriverView(generics.ListAPIView):
     pagination_class = MyPagination
     serializer_class = OrderSerializer
 
-    def get_queryset(self, from_place, to_place, to_place_district):
-        to_place_id = Place.objects.filter(to_place=to_place, to_place_district=to_place_district)
-        if to_place_id.exists():
-            to_place_id = to_place_id.first()
-            queryset = Order.objects.filter(is_driver=False).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
-            return queryset
-        return {}
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        to_place = self.request.GET.get('to_place', None)
+        to_place_district = self.request.GET.get('to_place_district', None)
+        from_place = self.request.GET.get('from_place', None)
+        if to_place and from_place and to_place_district:
+            to_place_id = Place.objects.filter(to_place=to_place, to_place_district=to_place_district)
+            if to_place_id.exists():
+                to_place_id = to_place_id.first()
+                queryset = Order.objects.filter(is_driver=True).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
+        return queryset
