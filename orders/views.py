@@ -308,6 +308,7 @@ class MyOrdersListView(generics.ListAPIView):
     serializer_class = OrderSerializer
     pagination_class = MyPagination
     permission_classes = [permissions.IsAuthenticated]
+    
 
     def get_queryset(self):
         queryset = Order.objects.prefetch_related('images').prefetch_related('to_place')
@@ -318,6 +319,7 @@ class MyOrdersListView(generics.ListAPIView):
         return queryset
 
 class Orders4DriverView(generics.ListAPIView):
+    # queryset = Order.objects.all()
     pagination_class = MyPagination
     serializer_class = OrderSerializer
 
@@ -326,6 +328,7 @@ class Orders4DriverView(generics.ListAPIView):
         return queryset
 
 class Orders4NonDriverView(generics.ListAPIView):
+    # queryset = Order.objects.all()
     pagination_class = MyPagination
     serializer_class = OrderSerializer
 
@@ -334,6 +337,7 @@ class Orders4NonDriverView(generics.ListAPIView):
         return queryset
 
 class FilteredOrders4DriverView(generics.ListAPIView):
+    queryset = Order.objects.all()
     pagination_class = MyPagination
     serializer_class = OrderSerializer
 
@@ -352,6 +356,7 @@ class FilteredOrders4DriverView(generics.ListAPIView):
 
 
 class FilteredOrders4NonDriverView(generics.ListAPIView):
+    queryset = Order.objects.all()
     pagination_class = MyPagination
     serializer_class = OrderSerializer
 
