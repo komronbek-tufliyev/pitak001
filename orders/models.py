@@ -32,7 +32,7 @@ class Place(models.Model):
     district = models.CharField(max_length=50, verbose_name=_('Tuman'), help_text=_("Tuman nomi. M: Yunusobod"), blank=True, null=True)
 
     def __str__(self) -> str:
-        return self.region + ', ' + self.district[::3]
+        return self.region + ', ' + self.district
 
     class Meta:
         verbose_name = _('Place')

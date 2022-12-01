@@ -14,7 +14,7 @@ from django.contrib.auth.models import Group
 class PlaceAdmin(admin.ModelAdmin):
     list_display = ('id', 'region', 'district',)
     search_fields = ('region', 'district', )
-    list_filter = ('region', 'district', )
+    list_filter = ('region', )
     list_per_page = 25
 
 admin.site.register(Place, PlaceAdmin)
