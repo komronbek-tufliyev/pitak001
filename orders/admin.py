@@ -19,7 +19,7 @@ class PlaceAdmin(admin.ModelAdmin):
 
 admin.site.register(Place, PlaceAdmin)
 
-admin.site.register(Order)
+
 # admin.site.register(OrderComment)
 class OrderImageAdmin(admin.ModelAdmin):
     list_display = ('id', 'order', 'image')
@@ -27,6 +27,17 @@ class OrderImageAdmin(admin.ModelAdmin):
     list_filter = ('order', 'image', )
     list_per_page = 25
 
+class ImageAdmin(admin.StackedInline):
+    model = OrderImage
+
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('id', 'owner', 'from_place', 'to_place', 'description', 'date', 'price')
+    search_fields = ('owner', 'name', 'from_place', 'description', 'price', )
+    list_filter = ('owner', 'from_place', 'to_place', 'date', )
+    list_per_page = 25
+    inlines = [ImageAdmin, ]
+
+admin.site.register(Order, OrderAdmin)
 
 admin.site.register(OrderImage, OrderImageAdmin)
 admin.site.unregister(Group)
