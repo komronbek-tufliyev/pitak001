@@ -30,6 +30,8 @@ from .views import(
     FilteredOrders4DriverView,
     FilteredOrders4NonDriverView,
     FilterByRegionView,
+    AddresbyFilter4Driver,
+    AddresbyFilter4nonDriver,
 )
 
 # Places views
@@ -68,4 +70,9 @@ urlpatterns = [
     # filter by place
     path('orders/for-driver/filter/<str:from_place>/<str:to_place_region>/<str:to_place_district>/', FilteredOrders4DriverView.as_view(), name='orders-for-driver'),
     path('orders/for-non-driver/filter/<str:from_place>/<str:to_place_region>/<str:to_place_district>/', FilteredOrders4NonDriverView.as_view(), name='orders-for-non-driver'), 
+    
+
+    # filter by from_place and to_place_region
+    path('orders/for-driver/filter/<str:from_place>/<str:to_place_region>/', AddresbyFilter4Driver.as_view(), name='filterla'),
+    path('orders/for-non-driver/filter/<str:from_place>/<str:to_place_region>/', AddresbyFilter4nonDriver.as_view(), name='laslka')
 ]

@@ -380,3 +380,39 @@ class FilteredOrders4NonDriverView(generics.ListAPIView):
                     queryset = Order.objects.filter(is_driver=True).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
 
         return queryset
+class AddresbyFilter4Driver(generics.ListAPIView):
+    queryset = Order.objects.all()
+    pagination_class = MyPagination
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # to_place_district = self.kwargs.get('to_place_district', None)
+        to_place_region = self.kwargs.get('to_place_region', None)
+        from_place = self.kwargs.get('from_place', None)
+        if to_place_region and from_place:
+            if to_place_region and from_place:
+                    
+                queryset = Order.objects.filter(is_driver=False).filter(from_place=from_place, to_place__region=to_place_region).prefetch_related('images').prefetch_related('to_place') 
+
+        return queryset
+
+
+class AddresbyFilter4nonDriver(generics.ListAPIView):
+    queryset = Order.objects.all()
+    pagination_class = MyPagination
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # to_place_district = self.kwargs.get('to_place_district', None)
+        to_place_region = self.kwargs.get('to_place_region', None)
+        from_place = self.kwargs.get('from_place', None)
+        if to_place_region and from_place:
+            if to_place_region and from_place:
+                    
+                queryset = Order.objects.filter(is_driver=True).filter(from_place=from_place, to_place__region=to_place_region).prefetch_related('images').prefetch_related('to_place') 
+
+        return queryset
