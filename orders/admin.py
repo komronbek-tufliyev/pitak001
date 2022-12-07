@@ -33,7 +33,7 @@ class ImageAdmin(admin.StackedInline):
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'owner', 'from_place', 'to_place', 'date', 'price')
     search_fields = ('owner', 'name', 'from_place', 'description', 'price', )
-    list_filter = ('from_place')
+    list_filter = ('from_place', )
     list_per_page = 25
     inlines = [ImageAdmin, ]
 
