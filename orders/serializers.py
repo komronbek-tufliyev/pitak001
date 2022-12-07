@@ -44,12 +44,12 @@ class CreateOrderDisplaySerializer(serializers.ModelSerializer):
 
     to_place = serializers.CharField()
     to_place_district = serializers.CharField()
-    date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
+    # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     class Meta:
         model = Order 
         ref_name = 'Order display'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'to_place_district', 'price', 'date', 'description', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'to_place_district', 'price', 'date', 'time', 'description', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
 class CreateOrderSerializer(serializers.ModelSerializer):
@@ -59,7 +59,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         write_only = True,
         required=False,
     )
-    date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
+    # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     # to_place = serializers.CharField()
     # to_place_district = serializers.CharField()
@@ -67,7 +67,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order 
         ref_name = 'Order'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'description', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
     def create(self, validated_data):
@@ -102,12 +102,12 @@ class OrderSerializer(serializers.ModelSerializer):
     images = OrderImageSerializer(many=True, read_only=True)
     to_place = PlaceSerializer(read_only=True)
     owner = UserSerializer(read_only=True)
-    date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
+    # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     class Meta:
         model = Order
         ref_name = 'Order Serializer'
-        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'description', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images']
+        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'time', 'description', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images']
 
 class OrderUpdateSerializer(serializers.ModelSerializer):
     images = OrderImageSerializer(many=True, read_only=True,)
@@ -116,7 +116,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         write_only = True,
         required=False,
     )
-    date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
+    # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     # to_place = serializers.CharField()
     # to_place_district = serializers.CharField()
@@ -129,7 +129,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order 
         ref_name = 'Order'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'description', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
     def update(self, instance, validated_data):
