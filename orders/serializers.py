@@ -4,6 +4,7 @@ from users.serializers import UserSerializer
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from users.serializers import UserSerializer
+from django.conf import settings
 User = get_user_model()
 
 
@@ -43,6 +44,7 @@ class CreateOrderDisplaySerializer(serializers.ModelSerializer):
 
     to_place = serializers.CharField()
     to_place_district = serializers.CharField()
+    date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     class Meta:
         model = Order 
@@ -57,6 +59,8 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         write_only = True,
         required=False,
     )
+    date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
+
     # to_place = serializers.CharField()
     # to_place_district = serializers.CharField()
 
@@ -98,6 +102,8 @@ class OrderSerializer(serializers.ModelSerializer):
     images = OrderImageSerializer(many=True, read_only=True)
     to_place = PlaceSerializer(read_only=True)
     owner = UserSerializer(read_only=True)
+    date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
+
     class Meta:
         model = Order
         ref_name = 'Order Serializer'
@@ -110,6 +116,8 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         write_only = True,
         required=False,
     )
+    date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
+
     # to_place = serializers.CharField()
     # to_place_district = serializers.CharField()
 

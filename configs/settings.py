@@ -192,3 +192,4 @@ SMS_CONFIG = {
 
 SMS_ENABLED = env.bool('SMS_ENABLED', default=True)
 
+DATETIME_FORMAT = '%Y-%m-%d %H:%m'
