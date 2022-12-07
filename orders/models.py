@@ -75,7 +75,7 @@ class Order(models.Model):
     from_place = models.CharField(max_length=100, verbose_name=_('From Place'), choices=REGION_CHOICES, help_text=_("Joy nomi, qayerdan..."))
     # to_place = models.CharField(max_length=100, verbose_name=_('To Place'), choices=REGION_CHOICES, help_text=_("Joy nomi, qayerga..."))
     to_place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='to_place', help_text=_("Joy nomi, qayerga..."))
-    date = models.DateTimeField(_('date'), blank=True, null=True, help_text=_("Buyurtma vaqti(ketish vaqti) YYYY-MM-DD. M: 2022-12-25"))
+    date = models.DateTimeField(_('date'), blank=True, null=True, help_text=_("Buyurtma vaqti(ketish vaqti) YYYY-MM-DD HH:MM. M: 2022-12-25 09:00"))
     price = models.IntegerField(_('price'), blank=True, null=True, help_text=_("Narxi"))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
