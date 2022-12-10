@@ -141,6 +141,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         instance.car = validated_data.get('car', instance.car)
         instance.car_number = validated_data.get('car_number', instance.car_number)
         instance.date = validated_data.get('date', instance.date)
+        instance.time = validated_data.get('time', instance.time)
         instance.price = validated_data.get('price', instance.price)
         instance.description = validated_data.get('description', instance.description)
         instance.is_driver = validated_data.get('is_driver', instance.is_driver)
