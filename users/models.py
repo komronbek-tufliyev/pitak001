@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
 from .managers import UserManager
 from django.core.validators import RegexValidator
+from PIL import Image
 
 
 # Create your models here.
@@ -42,6 +43,21 @@ class User(AbstractBaseUser):
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
+
+    def save(self, *args, **kwargs):
+        super().save()
+
+        try:
+
+            img = Image.open(self.image.path)
+
+            if img.height > 100 or img.width > 100:
+                new_img = (100, 100)
+                img.thumbnail(new_img)
+                img.save(self.image.path)
+        except:
+            print("Error occured in users models.py", Exception)
+            pass
 
     def get_full_name(self):
         if self.name:

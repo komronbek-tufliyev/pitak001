@@ -49,7 +49,7 @@ class CreateOrderDisplaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Order 
         ref_name = 'Order display'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'to_place_district', 'price', 'date', 'time', 'description', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'to_place_district', 'price', 'date', 'time', 'description', 'left_back_free', 'right_back_free', 'middle_free', 'forward_free', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
 class CreateOrderSerializer(serializers.ModelSerializer):
@@ -67,7 +67,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order 
         ref_name = 'Order'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_free', 'right_back_free', 'middle_free', 'forward_free', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
     def create(self, validated_data):
@@ -107,7 +107,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         ref_name = 'Order Serializer'
-        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'time', 'description', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images']
+        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_free', 'right_back_free', 'middle_free', 'forward_free', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images']
 
 class OrderUpdateSerializer(serializers.ModelSerializer):
     images = OrderImageSerializer(many=True, read_only=True,)
@@ -129,7 +129,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order 
         ref_name = 'Order'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_free', 'right_back_free', 'middle_free', 'forward_free', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
     def update(self, instance, validated_data):
@@ -144,6 +144,10 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         instance.time = validated_data.get('time', instance.time)
         instance.price = validated_data.get('price', instance.price)
         instance.description = validated_data.get('description', instance.description)
+        instance.left_back_free = validated_data.get('left_back_free', instance.left_back_free) 
+        instance.right_back_free = validated_data.get('right_back_free', instance.right_back_free)
+        instance.forward_free = validated_data.get('forward_free', instance.forward_free)
+        instance.middle_free = validated_data.get('middle_free', instance.middle_free) 
         instance.is_driver = validated_data.get('is_driver', instance.is_driver)
         instance.is_finished = validated_data.get('is_finished', instance.is_finished)
         instance.is_canceled = validated_data.get('is_canceled', instance.is_canceled)

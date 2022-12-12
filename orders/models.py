@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _ 
 from django.core.validators import RegexValidator
 from django.contrib.auth import get_user_model
+from PIL import Image
 
 from users.models import User
 
@@ -78,6 +79,10 @@ class Order(models.Model):
     date = models.DateField(_('date'), blank=True, null=True, help_text=_("Buyurtma vaqti(ketish vaqti) YYYY-MM-DD HH:MM. M: 2022-12-25 09:00"))
     time = models.TimeField(_('time'), blank=True, null=True, help_text=_("Soat: HH:MM:SS, 09:00:00"))
     price = models.IntegerField(_('price'), blank=True, null=True, help_text=_("Narxi"))
+    left_back_free = models.BooleanField(_('orqa chap o\'rindiq'), default=True, help_text=_("Mashinaning chap orqa o'rindig'i bo'shmi?"))
+    right_back_free = models.BooleanField(_('orqa chap o\'rindiq'), default=True, help_text=_("Mashinaning o'ng orqa o'rindig'i bo'shmi?"))
+    forward_free = models.BooleanField(_('haydovchi yonidagi o\'rindiq'), default=True, help_text=_("Mashinaning chap orqa o'rindig'i bo'shmi?"))
+    middle_free = models.BooleanField(_('orqa o\'rtadagi o\'rindiq'), default=True, help_text=_("Mashinaning o'rta o'rindig'i bo'shmi?"))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_driver = models.BooleanField(default=False, help_text=_("Buyurtmani beruvchi shaxs haydovchi bo'lsa True, aks holda False"))
@@ -165,3 +170,18 @@ class OrderImage(models.Model):
 
     def __str__(self) -> str:
         return f"{self.pk} '+' {self.order.pk}. Media"
+
+    def save(self, *args, **kwargs):
+        super().save()
+
+        try:
+            img = Image.open(self.image.path)
+
+            if img.height > 100 or img.width > 100:
+                new_img = (100, 100)
+                img.thumbnail(new_img)
+                img.save(self.image.path)
+        except:
+            print("Error occured in order models.py", Exception)
+            pass
+
