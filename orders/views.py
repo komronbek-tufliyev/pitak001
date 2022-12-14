@@ -17,6 +17,7 @@ from .models import (
     OrderImage,
     Place,
 )
+from django.db.models import Prefetch, Exists, OuterRef
 
 from .serializers import (
     OrderSerializer,
@@ -45,6 +46,30 @@ class OrderList(generics.ListAPIView):
     http_method_names = ['get']
     pagination_class = MyPagination
 
+    # def get(self, request, *args, **kwargs):
+    #     orders =  super().get(request, *args, **kwargs)
+    #     user = self.request.user
+    #     new_update_data = []
+    #     if user is not None:
+    #         print("User is not None")
+    #         fav_orders = user.favourite.all()
+    #         if not fav_orders:
+    #             print("No fav orders")
+    #             return orders
+    #         orders_data = orders.data['results']
+    #         for order in orders_data:
+    #             for fav_order in fav_orders:
+    #                 if order['id'] == fav_order.pk:
+    #                     new_update_data.append({'is_liked': True, 'order': order})
+    #                 else:
+    #                     new_update_data.append({'is_liked': False, 'order': order})
+
+    #         orders.data['results'] = new_update_data
+    #         # return orders
+    #     return orders
+                    
+
+
 class OrderDetail(generics.RetrieveAPIView):
     queryset = Order.objects.prefetch_related('images')
     permission_classes = [permissions.AllowAny]
@@ -63,15 +88,7 @@ class OrderCreateView(viewsets.ModelViewSet):
         if 'to_place' in request.data and 'to_place_district' in request.data:
             to_place_region = request.data.get('to_place', None)
             to_place_district = request.data.get('to_place_district', None)
-            # print("to_place", to_place)
-            # print("to_place_district", to_place_district)
-            # if not to_place and to_place_district:
-            #     msg = {'detail': 'to_place is required'}
-            # elif not to_place_district and to_place:
-            #     msg = {'detail': 'to_place_district is required'}
-            # elif not to_place and not to_place_district:
-            #     msg = {'detail': 'to_place and to_place_district is required'}
-            # if to_place and to_place_district:
+            
 
             to_place_id = Place.objects.filter(region=to_place_region, district=to_place_district)
             if to_place_id.exists():
@@ -122,26 +139,6 @@ class OrderUpdateView(generics.UpdateAPIView):
                 request.POST._mutable = False
             else:
                 return Response({'status': False, 'detail': f'Bunday manzil topilmadi, To place exists: {to_place_id.exists()}'}, status=status.HTTP_400_BAD_REQUEST)
-        # if to_place_region and to_place_district:
-        #     to_place_id = Place.objects.filter(region=to_place_region, district=to_place_district)
-        #     if to_place_id.exists():
-        #         to_place = to_place_id.first().pk
-        #     else:
-        #         to_place = Place.objects.create(region=to_place_region, district=to_place_district).pk
-        #     request.POST._mutable = True
-        #     request.data['to_place'] = to_place
-        #     request.POST._mutable = False
-        # elif to_place_region and not to_place_district:
-        #     return Response({'detail': 'to_place_district is required'}, status=status.HTTP_400_BAD_REQUEST)
-        # elif not to_place_region and to_place_district:
-        #     to_place_id = Place.objects.filter(district=to_place_district, region=instance.to_place.region)
-        #     if to_place_id.exists():
-        #         to_place = to_place_id.first().pk
-        #     else:
-        #         to_place = Place.objects.create(region=instance.to_place.region, district=to_place_district).pk
-        #   request.POST._mutable = True
-        #   request.data['to_place'] = to_place
-        #   request.POST._mutable = False
         
         serializer = OrderUpdateSerializer(instance=instance, data=request.data, context={'owner': request.user},  partial=True)
         if serializer.is_valid(raise_exception=True):
@@ -228,10 +225,6 @@ class PlaceDetail(generics.RetrieveAPIView):
 
 class PlaceView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    # def get(self, request, format=None):
-    #     places = Place.objects.all()
-    #     serializer = PlaceSerializer(places, many=True)
-    #     return Response(serializer.data)
 
     @swagger_auto_schema(request_body=PlaceSerializer)
     def post(self, request, format=None):
@@ -391,6 +384,8 @@ class FilteredOrders4NonDriverView(generics.ListAPIView):
                     queryset = Order.objects.filter(is_driver=True).filter(from_place=from_place, to_place=to_place_id).prefetch_related('images').prefetch_related('to_place') 
 
         return queryset
+
+
 class AddresbyFilter4Driver(generics.ListAPIView):
     queryset = Order.objects.all()
     pagination_class = MyPagination
@@ -408,7 +403,7 @@ class AddresbyFilter4Driver(generics.ListAPIView):
             if to_place_region and from_place:
                     
                 queryset = Order.objects.filter(is_driver=False).filter(from_place=from_place, to_place__region=to_place_region).prefetch_related('images').prefetch_related('to_place') 
-
+        
         return queryset
 
 

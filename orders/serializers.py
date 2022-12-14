@@ -102,12 +102,31 @@ class OrderSerializer(serializers.ModelSerializer):
     images = OrderImageSerializer(many=True, read_only=True)
     to_place = PlaceSerializer(read_only=True)
     owner = UserSerializer(read_only=True)
+    is_liked = serializers.BooleanField(read_only=True, help_text=_("Agar orderga like bosilgan bo'lsa is_liked=True bo'ladi"))
     # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     class Meta:
         model = Order
         ref_name = 'Order Serializer'
-        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_free', 'right_back_free', 'middle_free', 'forward_free', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images']
+        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_free', 'right_back_free', 'middle_free', 'forward_free', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images', 'is_liked']
+
+    def to_representation(self, instance):
+        # from pprint import pprint
+        data = super().to_representation(instance)
+        # print(data)
+        user = self.context['request'].user
+        # print("User", user)
+        if user is not None:
+            fav_order_ids = [order.pk for order in user.favourite.all()]
+            # print("Fav order ids", fav_order_ids)
+            if data.get('id') in fav_order_ids:
+                # print("True")
+                data.update({'is_liked': True})
+            else:
+                # print("False")
+                data.update({'is_liked': False})
+        return data
+
 
 class OrderUpdateSerializer(serializers.ModelSerializer):
     images = OrderImageSerializer(many=True, read_only=True,)
