@@ -125,7 +125,7 @@ class OrderSerializer(serializers.ModelSerializer):
         # print(data)
         user = self.context['request'].user
         # print("User", user)
-        if user is not None:
+        if user is not None and user.is_authenticated:
             fav_order_ids = [order.pk for order in user.favourite.all()]
             # print("Fav order ids", fav_order_ids)
             if data.get('id') in fav_order_ids:
