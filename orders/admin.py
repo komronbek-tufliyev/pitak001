@@ -15,6 +15,7 @@ class PlaceAdmin(admin.ModelAdmin):
     list_display = ('id', 'region', 'district',)
     search_fields = ('region', 'district', )
     list_filter = ('region', )
+    ordering = ('region',)
     list_per_page = 25
 
 admin.site.register(Place, PlaceAdmin)
