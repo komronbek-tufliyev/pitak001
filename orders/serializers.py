@@ -3,7 +3,7 @@ from .models import Order, OrderComment, Place, OrderImage
 from users.serializers import UserSerializer
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
-from users.serializers import UserSerializer
+from users.serializers import UserSerializer, ProfileSerializer
 from django.conf import settings
 User = get_user_model()
 
@@ -44,12 +44,16 @@ class CreateOrderDisplaySerializer(serializers.ModelSerializer):
 
     to_place = serializers.CharField()
     to_place_district = serializers.CharField()
+    left_back_seat = ProfileSerializer()
+    right_back_seat = ProfileSerializer()
+    forward_seat = ProfileSerializer()
+    middle_seat = ProfileSerializer()
     # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     class Meta:
         model = Order 
         ref_name = 'Order display'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'to_place_district', 'price', 'date', 'time', 'description', 'left_back_free', 'right_back_free', 'middle_free', 'forward_free', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'to_place_district', 'price', 'date', 'time', 'description', 'left_back_seat', 'right_back_seat', 'middle_seat', 'forward_seat', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
 class CreateOrderSerializer(serializers.ModelSerializer):
@@ -59,6 +63,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         write_only = True,
         required=False,
     )
+
     # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     # to_place = serializers.CharField()
@@ -67,7 +72,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order 
         ref_name = 'Order'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_free', 'right_back_free', 'middle_free', 'forward_free', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_seat', 'right_back_seat', 'middle_seat', 'forward_seat', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
     def create(self, validated_data):
@@ -102,13 +107,17 @@ class OrderSerializer(serializers.ModelSerializer):
     images = OrderImageSerializer(many=True, read_only=True)
     to_place = PlaceSerializer(read_only=True)
     owner = UserSerializer(read_only=True)
+    left_back_seat = ProfileSerializer()
+    right_back_seat = ProfileSerializer()
+    forward_seat = ProfileSerializer()
+    middle_seat = ProfileSerializer()
     is_liked = serializers.BooleanField(read_only=True, help_text=_("Agar orderga like bosilgan bo'lsa is_liked=True bo'ladi"))
     # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     class Meta:
         model = Order
         ref_name = 'Order Serializer'
-        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_free', 'right_back_free', 'middle_free', 'forward_free', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images', 'is_liked']
+        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_seat', 'right_back_seat', 'middle_seat', 'forward_seat', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images', 'is_liked']
 
     def to_representation(self, instance):
         # from pprint import pprint
@@ -148,7 +157,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order 
         ref_name = 'Order'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_free', 'right_back_free', 'middle_free', 'forward_free', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_seat', 'right_back_seat', 'middle_seat', 'forward_seat', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
     def update(self, instance, validated_data):
@@ -163,10 +172,10 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         instance.time = validated_data.get('time', instance.time)
         instance.price = validated_data.get('price', instance.price)
         instance.description = validated_data.get('description', instance.description)
-        instance.left_back_free = validated_data.get('left_back_free', instance.left_back_free) 
-        instance.right_back_free = validated_data.get('right_back_free', instance.right_back_free)
-        instance.forward_free = validated_data.get('forward_free', instance.forward_free)
-        instance.middle_free = validated_data.get('middle_free', instance.middle_free) 
+        instance.left_back_seat = validated_data.get('left_back_seat', instance.left_back_seat) 
+        instance.right_back_seat = validated_data.get('right_back_seat', instance.right_back_seat)
+        instance.forward_seat = validated_data.get('forward_seat', instance.forward_seat)
+        instance.middle_seat = validated_data.get('middle_seat', instance.middle_seat) 
         instance.is_driver = validated_data.get('is_driver', instance.is_driver)
         instance.is_finished = validated_data.get('is_finished', instance.is_finished)
         instance.is_canceled = validated_data.get('is_canceled', instance.is_canceled)
@@ -201,6 +210,8 @@ class FavouriteOrderSerializer(serializers.ModelSerializer):
                 return user
         return user
     
+    def to_representation(self, instance):
+        return super().to_representation(instance)
 
 class DisplayFavOrderSerializer(serializers.Serializer):
     id = serializers.IntegerField()

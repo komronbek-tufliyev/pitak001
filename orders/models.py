@@ -79,10 +79,14 @@ class Order(models.Model):
     date = models.DateField(_('date'), blank=True, null=True, help_text=_("Buyurtma vaqti(ketish vaqti) YYYY-MM-DD HH:MM. M: 2022-12-25 09:00"))
     time = models.TimeField(_('time'), blank=True, null=True, help_text=_("Soat: HH:MM:SS, 09:00:00"))
     price = models.IntegerField(_('price'), blank=True, null=True, help_text=_("Narxi"))
-    left_back_free = models.BooleanField(_('orqa chap o\'rindiq'), default=True, help_text=_("Mashinaning chap orqa o'rindig'i bo'shmi?"))
-    right_back_free = models.BooleanField(_('orqa chap o\'rindiq'), default=True, help_text=_("Mashinaning o'ng orqa o'rindig'i bo'shmi?"))
-    forward_free = models.BooleanField(_('haydovchi yonidagi o\'rindiq'), default=True, help_text=_("Mashinaning chap orqa o'rindig'i bo'shmi?"))
-    middle_free = models.BooleanField(_('orqa o\'rtadagi o\'rindiq'), default=True, help_text=_("Mashinaning o'rta o'rindig'i bo'shmi?"))
+    # left_back_free = models.BooleanField(_('orqa chap o\'rindiq'), default=True, help_text=_("Mashinaning chap orqa o'rindig'i bo'shmi?"))
+    # right_back_free = models.BooleanField(_('orqa o\'ng o\'rindiq'), default=True, help_text=_("Mashinaning o'ng orqa o'rindig'i bo'shmi?"))
+    # forward_free = models.BooleanField(_('haydovchi yonidagi o\'rindiq'), default=True, help_text=_("Haydovchi yonidagi o'rindig'i bo'shmi?"))
+    # middle_free = models.BooleanField(_('orqa o\'rtadagi o\'rindiq'), default=True, help_text=_("Mashinaning o'rta o'rindig'i bo'shmi?"))
+    left_back_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='leftbackseat') # default=None
+    right_back_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rightbackseat') # default=None
+    forward_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='forwardseat') # default=None
+    middle_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='middleseat') # default=None
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_driver = models.BooleanField(default=False, help_text=_("Buyurtmani beruvchi shaxs haydovchi bo'lsa True, aks holda False"))

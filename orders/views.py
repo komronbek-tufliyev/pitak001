@@ -101,7 +101,7 @@ class OrderCreateView(viewsets.ModelViewSet):
             request.POST._mutable = True
             request.data['to_place'] = to_place
             request.POST._mutable = False
-            serializer = CreateOrderSerializer(data=request.data, context={'owner': request.user})
+            serializer = CreateOrderSerializer(data=request.data, context={'owner': request.user, 'request': request})
 
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
@@ -140,7 +140,7 @@ class OrderUpdateView(generics.UpdateAPIView):
             else:
                 return Response({'status': False, 'detail': f'Bunday manzil topilmadi, To place exists: {to_place_id.exists()}'}, status=status.HTTP_400_BAD_REQUEST)
         
-        serializer = OrderUpdateSerializer(instance=instance, data=request.data, context={'owner': request.user},  partial=True)
+        serializer = OrderUpdateSerializer(instance=instance, data=request.data, context={'owner': request.user, 'reuqest': request},  partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response({'detail':serializer.data, 'status': True, 'message': 'Order updated succesfully'}, status=status.HTTP_201_CREATED)
@@ -247,23 +247,38 @@ class FilterByRegionView(generics.ListAPIView):
             queryset =  Place.objects.filter(region=region_by).all()
         return queryset
 
-class FavOrderView(APIView):
+class FavOrderView(generics.ListAPIView):
     """
         Favourite Order View has two methods: post and delete
         # Post method addes user id to order.favourite m2m field
         # Delete method removes user id from order.favourite m2m field 
     """
-    def get(self, request):
-        user = request.user
-        print("fav orders", user)
-        try:
+    serializer_class = FavouriteOrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'delete', 'post', 'patch', 'put']
 
-            serializer = FavouriteOrderSerializer(user)
-            return Response({'status': True, 'detail': serializer.data}, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        if self.request.user is not None:
+            fav_orders = self.request.user.favourite.all()
+            return fav_orders
+        return super().get_queryset()
+        
 
-        except Exception as e:
-            print("Error", e)
-            return Response({'status': False, 'detail': f"Error {e}"}, status=status.HTTP_204_NO_CONTENT)
+    # def get(self, request):
+    #     user = request.user
+    #     print("fav orders", user)
+    #     try:
+    #         # serializer = FavouriteOrderSerializer(data=request.data)
+    #         fav_orders = user.favourite.all()
+
+    #         # if serializer.is_valid(raise_exception=True):
+    #             # if serializer.data is None:
+    #         return Response({'status': True, 'detail': }, status=status.HTTP_200_OK)
+    #             # else:
+    #                 # return Response({'status': True, 'detail': 'You have no favourite orders yet'})
+    #     except Exception as e:
+    #         print("Error", e)
+    #         return Response({'status': False, 'detail': f"Error {e}"}, status=status.HTTP_204_NO_CONTENT)
    
     @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
     def post(self, request):
@@ -276,10 +291,10 @@ class FavOrderView(APIView):
             print("is Order in user.fav ", order in user.favourite.all())
             if order in user.favourite.all():
                 return Response({'status': False, 'detail': 'Order already in favourite'}, status=status.HTTP_200_OK)   
-            serializer = FavouriteOrderSerializer(data=request.data, context={'user': user, 'order': order})
+            serializer = FavouriteOrderSerializer(data=request.data, context={'user': user, 'order': order, "request": request})
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
-                return Response({'status': True, 'detail': serializer.data}, status=status.HTTP_201_CREATED)
+                return Response({'status': True, 'detail': 'Order added to favourites list'}, status=status.HTTP_201_CREATED)
             return Response({'status': False, 'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
            
         print("Anaqa...", "error chiqdi bro")    

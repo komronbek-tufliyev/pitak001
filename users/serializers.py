@@ -34,6 +34,10 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Phone is required')
         return phone
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User 
+        fields = ['phone', 'phone2', 'name']
 
 class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
