@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Order, OrderComment, Place, OrderImage
+from .models import Order, OrderComment, Place, OrderImage, Seats
 from users.serializers import UserSerializer
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
@@ -7,6 +7,21 @@ from users.serializers import UserSerializer, ProfileSerializer
 from django.conf import settings
 User = get_user_model()
 
+
+class SeatSerializer(serializers.ModelSerializer):
+    user = ProfileSerializer()
+    class Meta:
+        model = Seats
+        fields = '__all__'
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        order = self.context['order']
+        if user is not None and user.is_authenticated:
+            if order is not None:
+                Seats.objects.create(user=user, order=order, )
+        return super().create(validated_data)
+  
 
 class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,12 +63,12 @@ class CreateOrderDisplaySerializer(serializers.ModelSerializer):
     right_back_seat = ProfileSerializer()
     forward_seat = ProfileSerializer()
     middle_seat = ProfileSerializer()
-    # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
+    seats = SeatSerializer(required=False)    # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     class Meta:
         model = Order 
         ref_name = 'Order display'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'to_place_district', 'price', 'date', 'time', 'description', 'left_back_seat', 'right_back_seat', 'middle_seat', 'forward_seat', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'to_place_district', 'price', 'date', 'time', 'description', 'seats', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
 class CreateOrderSerializer(serializers.ModelSerializer):
@@ -63,7 +78,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         write_only = True,
         required=False,
     )
-
+    seats = SeatSerializer(required=False)
     # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     # to_place = serializers.CharField()
@@ -72,7 +87,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order 
         ref_name = 'Order'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_seat', 'right_back_seat', 'middle_seat', 'forward_seat', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'seats', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
     def create(self, validated_data):
@@ -107,17 +122,18 @@ class OrderSerializer(serializers.ModelSerializer):
     images = OrderImageSerializer(many=True, read_only=True)
     to_place = PlaceSerializer(read_only=True)
     owner = UserSerializer(read_only=True)
-    left_back_seat = ProfileSerializer()
-    right_back_seat = ProfileSerializer()
-    forward_seat = ProfileSerializer()
-    middle_seat = ProfileSerializer()
+    seats = SeatSerializer(required=False)
+    # left_back_seat = ProfileSerializer()
+    # right_back_seat = ProfileSerializer()
+    # forward_seat = ProfileSerializer()
+    # middle_seat = ProfileSerializer()
     is_liked = serializers.BooleanField(read_only=True, help_text=_("Agar orderga like bosilgan bo'lsa is_liked=True bo'ladi"))
     # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     class Meta:
         model = Order
         ref_name = 'Order Serializer'
-        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_seat', 'right_back_seat', 'middle_seat', 'forward_seat', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images', 'is_liked']
+        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'time', 'description', 'seats', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images', 'is_liked']
 
     def to_representation(self, instance):
         # from pprint import pprint
@@ -135,7 +151,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 # print("False")
                 data.update({'is_liked': False})
         return data
-
+   
 
 class OrderUpdateSerializer(serializers.ModelSerializer):
     images = OrderImageSerializer(many=True, read_only=True,)
@@ -144,10 +160,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         write_only = True,
         required=False,
     )
-    # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
-
-    # to_place = serializers.CharField()
-    # to_place_district = serializers.CharField()
+    seats = SeatSerializer(required=False)    
 
     def clear_existing_images(self, instance):
         for order_image in instance.orderimage_set.all():
@@ -157,71 +170,58 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order 
         ref_name = 'Order'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'left_back_seat', 'right_back_seat', 'middle_seat', 'forward_seat', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'seats', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
     def update(self, instance, validated_data):
+        if validated_data == {}:
+            print("Validated data is None", validated_data)
+            return instance
+        else:
+            print("Val data", validated_data)
+
         # print("Validated data", validated_data)
-        owner = self.context.get('owner')
-        uploaded_images = validated_data.pop('uploaded_images', None)
-        instance.from_place = validated_data.get('from_place', instance.from_place)
-        instance.to_place = validated_data.get('to_place', instance.to_place)
-        instance.car = validated_data.get('car', instance.car)
-        instance.car_number = validated_data.get('car_number', instance.car_number)
-        instance.date = validated_data.get('date', instance.date)
-        instance.time = validated_data.get('time', instance.time)
-        instance.price = validated_data.get('price', instance.price)
-        instance.description = validated_data.get('description', instance.description)
-        instance.left_back_seat = validated_data.get('left_back_seat', instance.left_back_seat) 
-        instance.right_back_seat = validated_data.get('right_back_seat', instance.right_back_seat)
-        instance.forward_seat = validated_data.get('forward_seat', instance.forward_seat)
-        instance.middle_seat = validated_data.get('middle_seat', instance.middle_seat) 
-        instance.is_driver = validated_data.get('is_driver', instance.is_driver)
-        instance.is_finished = validated_data.get('is_finished', instance.is_finished)
-        instance.is_canceled = validated_data.get('is_canceled', instance.is_canceled)
-        instance.is_paid = validated_data.get('is_paid', instance.is_paid)
-        instance.is_active = validated_data.get('is_active', instance.is_active)
-        # instance
-        # print("New order", instance)
-        # print("Ser images", uploaded_images)
-        if uploaded_images:
-            order_image_model_instance = [OrderImage(order=instance, image=image) for image in uploaded_images]
-            OrderImage.objects.bulk_create(order_image_model_instance)
-            # for image in uploaded_images:
-            #     print("Order image", image)
-            #     new_order_image = OrderImage.objects.create(order=instance, image=image)
-        instance.save()
-        return instance
+            owner = self.context.get('owner')
+            uploaded_images = validated_data.pop('uploaded_images', None)
+            instance.from_place = validated_data.get('from_place', instance.from_place)
+            instance.to_place = validated_data.get('to_place', instance.to_place)
+            instance.car = validated_data.get('car', instance.car)
+            instance.car_number = validated_data.get('car_number', instance.car_number)
+            instance.date = validated_data.get('date', instance.date)
+            instance.time = validated_data.get('time', instance.time)
+            instance.price = validated_data.get('price', instance.price)
+            instance.description = validated_data.get('description', instance.description)
+            instance.is_driver = validated_data.get('is_driver', instance.is_driver)
+            instance.is_finished = validated_data.get('is_finished', instance.is_finished)
+            instance.is_canceled = validated_data.get('is_canceled', instance.is_canceled)
+            instance.is_paid = validated_data.get('is_paid', instance.is_paid)
+            instance.is_active = validated_data.get('is_active', instance.is_active)
+            # instance
+            # print("New order", instance)
+            # print("Ser images", uploaded_images)
+            if uploaded_images:
+                order_image_model_instance = [OrderImage(order=instance, image=image) for image in uploaded_images]
+                OrderImage.objects.bulk_create(order_image_model_instance)
+                # for image in uploaded_images:
+                #     print("Order image", image)
+                #     new_order_image = OrderImage.objects.create(order=instance, image=image)
+            instance.save()
+            return instance
 
 
 class BookSeatSerializer(serializers.ModelSerializer):
     SEAT_CHOICES = (
-        ('left_back_seat', 'left_back'),
-        ('right_back_seat', 'right_back'),
-        ('middle_seat', 'middle'),
-        ('forward_seat', 'forward')
+        (4, 'left_back'),
+        (3, 'right_back'),
+        (2, 'middle'),
+        (1, 'forward')
     )
     seat = serializers.ChoiceField(choices=SEAT_CHOICES)
     class Meta:
         model = Order
         fields = ['seat']
 
-    def update(self, instance, validated_data):
-        seats = ['left_back_seat', 'right_back_seat', 'forward_seat', 'middle_seat']
-        user = self.context['request'].user
-        seat = validated_data.get('seats', None)
-        if user is not None and user.is_authenticated:
-            if seat is not None:
-                match seat:
-                    case 'left_back_seat':
-                        instance.left_back_seat = user 
-                    case 'right_back_seat':
-                        instance.right_back_seat = user 
-                    case 'forward_seat':
-                        instance.forward_seat = user 
-                    case 'middle_seat':
-                        instance.middle_seat = user 
-                instance.save()
+    
             
 
 

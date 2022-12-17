@@ -83,10 +83,11 @@ class Order(models.Model):
     # right_back_free = models.BooleanField(_('orqa o\'ng o\'rindiq'), default=True, help_text=_("Mashinaning o'ng orqa o'rindig'i bo'shmi?"))
     # forward_free = models.BooleanField(_('haydovchi yonidagi o\'rindiq'), default=True, help_text=_("Haydovchi yonidagi o'rindig'i bo'shmi?"))
     # middle_free = models.BooleanField(_('orqa o\'rtadagi o\'rindiq'), default=True, help_text=_("Mashinaning o'rta o'rindig'i bo'shmi?"))
-    left_back_seat = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='leftbackseat') # default=None
-    right_back_seat = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rightbackseat') # default=None
-    forward_seat = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='forwardseat') # default=None
-    middle_seat = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='middleseat') # default=None
+    # left_back_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='leftbackseat') # default=None
+    # right_back_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rightbackseat') # default=None
+    # forward_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='forwardseat') # default=None
+    # middle_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='middleseat') # default=None
+    passengers = models.ManyToManyField('Seats', blank=True, help_text=_("Yo'lovchilar to'plami"), related_name='order_passengers')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_driver = models.BooleanField(default=False, help_text=_("Buyurtmani beruvchi shaxs haydovchi bo'lsa True, aks holda False"))
@@ -144,7 +145,6 @@ class Order(models.Model):
     def sort_by_owner(self):
         return self.owner.phone
 
-
     class Meta:
         verbose_name = _('Order')
         verbose_name_plural = _('Orders')
@@ -160,6 +160,24 @@ class Order(models.Model):
 
 #     def __str__(self) -> str:
 #         return f"order_id: {self.order.pk} + seats_id: {self.pk}"
+
+class Seats(models.Model):
+    SEAT_CHOICES = (
+        # ('left_back', 'left_back'),
+        # ('right_back', 'right_back'),
+        # ('forward', 'forward'),
+        # ('middle', 'middle')
+        (1, 'forward'), 
+        (2, 'right_back'),
+        (3, 'middle'), 
+        (4, 'left_back'),
+    )
+    user = models.ForeignKey(User, related_name='seat_model_user', on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, related_name='seat_model_order', on_delete=models.CASCADE)
+    seat = models.CharField(max_length=20, choices=SEAT_CHOICES)
+
+    def __str__(self) -> str:
+        return f"{self.seat}/ order: {self.order.pk}, user: {self.user.pk}"  
 
 
 class OrderComment(models.Model):

@@ -140,10 +140,10 @@ class OrderUpdateView(generics.UpdateAPIView):
             else:
                 return Response({'status': False, 'detail': f'Bunday manzil topilmadi, To place exists: {to_place_id.exists()}'}, status=status.HTTP_400_BAD_REQUEST)
         
-        serializer = OrderUpdateSerializer(instance=instance, data=request.data, context={'owner': request.user, 'reuqest': request},  partial=True)
+        serializer = OrderUpdateSerializer(instance=instance, data=request.data, context={'owner': request.user, 'request': request},  partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response({'detail':serializer.data, 'status': True, 'message': 'Order updated succesfully'}, status=status.HTTP_201_CREATED)
+            return Response({'detail':serializer.data, 'status': True, 'message': 'Order updated succesfully'}, status=status.HTTP_200_OK)
         # headers = self.get_success_headers(serializer.data)
         return Response({'detail': serializer.errors, 'status': False, 'message': 'Could not update order'}, status=status.HTTP_400_BAD_REQUEST)
 
