@@ -83,10 +83,10 @@ class Order(models.Model):
     # right_back_free = models.BooleanField(_('orqa o\'ng o\'rindiq'), default=True, help_text=_("Mashinaning o'ng orqa o'rindig'i bo'shmi?"))
     # forward_free = models.BooleanField(_('haydovchi yonidagi o\'rindiq'), default=True, help_text=_("Haydovchi yonidagi o'rindig'i bo'shmi?"))
     # middle_free = models.BooleanField(_('orqa o\'rtadagi o\'rindiq'), default=True, help_text=_("Mashinaning o'rta o'rindig'i bo'shmi?"))
-    left_back_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='leftbackseat') # default=None
-    right_back_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rightbackseat') # default=None
-    forward_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='forwardseat') # default=None
-    middle_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='middleseat') # default=None
+    left_back_seat = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='leftbackseat') # default=None
+    right_back_seat = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rightbackseat') # default=None
+    forward_seat = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='forwardseat') # default=None
+    middle_seat = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='middleseat') # default=None
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_driver = models.BooleanField(default=False, help_text=_("Buyurtmani beruvchi shaxs haydovchi bo'lsa True, aks holda False"))
@@ -148,6 +148,19 @@ class Order(models.Model):
     class Meta:
         verbose_name = _('Order')
         verbose_name_plural = _('Orders')
+
+
+# SEATS MODEL OF CAR
+# class SeatsModel(models.Model):
+#     left_back_seat = models.OneToOneField(User, verbose_name=_("orqadagi chap o'rindiq"), on_delete=models.SET_NULL, null=True, blank=True, related_name='leftbackseat_seatsmodel')
+#     right_back_seat = models.OneToOneField(User, verbose_name=_("orqadagi o'ng o'rindiq"), on_delete=models.SET_NULL, null=True, blank=True, related_name='rightbackseat_seatsmodel') # default=None
+#     forward_seat = models.OneToOneField(User, verbose_name=_("haydovchi yonidagi o'rindiq"), on_delete=models.SET_NULL, null=True, blank=True, related_name='forwardseat_seatsmodel') # default=None
+#     middle_seat = models.OneToOneField(User, verbose_name=_("orqadagi o'rta o'rindiq"), on_delete=models.SET_NULL, null=True, blank=True, related_name='middleseat_seatsmodel') # default=None
+#     order = models.OneToOneField(Order, verbose_name=_("Order "), on_delete=models.CASCADE, related_name='order_seatsmodel')
+
+#     def __str__(self) -> str:
+#         return f"order_id: {self.order.pk} + seats_id: {self.pk}"
+
 
 class OrderComment(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='comments')

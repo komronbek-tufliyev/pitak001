@@ -76,7 +76,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         extra_kwargs = {"owner": {"read_only": True}}
 
     def create(self, validated_data):
-        print("Validated data", validated_data)
+        # print("Validated data", validated_data)
         owner = self.context.get('owner')
         uploaded_images = validated_data.pop('uploaded_images', None)
         # to_place = validated_data.pop('to_place', None)
@@ -91,11 +91,11 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             # to_place=to_place,
             **validated_data
         )
-        print("New order", new_order)
-        print("Ser images", uploaded_images)
+        # print("New order", new_order)
+        # print("Ser images", uploaded_images)
         if uploaded_images:
             for image in uploaded_images:
-                print("Order image", image)
+                # print("Order image", image)
                 new_order_image = OrderImage.objects.create(order=new_order, image=image)
 
         return new_order
@@ -182,8 +182,8 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         instance.is_paid = validated_data.get('is_paid', instance.is_paid)
         instance.is_active = validated_data.get('is_active', instance.is_active)
         # instance
-        print("New order", instance)
-        print("Ser images", uploaded_images)
+        # print("New order", instance)
+        # print("Ser images", uploaded_images)
         if uploaded_images:
             order_image_model_instance = [OrderImage(order=instance, image=image) for image in uploaded_images]
             OrderImage.objects.bulk_create(order_image_model_instance)
@@ -192,6 +192,37 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
             #     new_order_image = OrderImage.objects.create(order=instance, image=image)
         instance.save()
         return instance
+
+
+class BookSeatSerializer(serializers.ModelSerializer):
+    SEAT_CHOICES = (
+        ('left_back_seat', 'left_back'),
+        ('right_back_seat', 'right_back'),
+        ('middle_seat', 'middle'),
+        ('forward_seat', 'forward')
+    )
+    seat = serializers.ChoiceField(choices=SEAT_CHOICES)
+    class Meta:
+        model = Order
+        fields = ['seat']
+
+    def update(self, instance, validated_data):
+        seats = ['left_back_seat', 'right_back_seat', 'forward_seat', 'middle_seat']
+        user = self.context['request'].user
+        seat = validated_data.get('seats', None)
+        if user is not None and user.is_authenticated:
+            if seat is not None:
+                match seat:
+                    case 'left_back_seat':
+                        instance.left_back_seat = user 
+                    case 'right_back_seat':
+                        instance.right_back_seat = user 
+                    case 'forward_seat':
+                        instance.forward_seat = user 
+                    case 'middle_seat':
+                        instance.middle_seat = user 
+                instance.save()
+            
 
 
 

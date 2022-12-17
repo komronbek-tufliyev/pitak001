@@ -105,7 +105,7 @@ class OrderCreateView(viewsets.ModelViewSet):
 
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
-                print("ser data", serializer.data)
+                # print("ser data", serializer.data)
                 return Response({'detail':serializer.data, 'status': True}, status=status.HTTP_201_CREATED)
             # headers = self.get_success_headers(serializer.data)
             return Response({'detail': serializer.errors, 'status': False}, status=status.HTTP_400_BAD_REQUEST)
@@ -247,13 +247,13 @@ class FilterByRegionView(generics.ListAPIView):
             queryset =  Place.objects.filter(region=region_by).all()
         return queryset
 
-class FavOrderView(generics.ListAPIView):
+class FavOrderView(generics.ListCreateAPIView):
     """
         Favourite Order View has two methods: post and delete
         # Post method addes user id to order.favourite m2m field
         # Delete method removes user id from order.favourite m2m field 
     """
-    serializer_class = FavouriteOrderSerializer
+    serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'delete', 'post', 'patch', 'put']
 
@@ -262,24 +262,12 @@ class FavOrderView(generics.ListAPIView):
             fav_orders = self.request.user.favourite.all()
             return fav_orders
         return super().get_queryset()
-        
 
-    # def get(self, request):
-    #     user = request.user
-    #     print("fav orders", user)
-    #     try:
-    #         # serializer = FavouriteOrderSerializer(data=request.data)
-    #         fav_orders = user.favourite.all()
-
-    #         # if serializer.is_valid(raise_exception=True):
-    #             # if serializer.data is None:
-    #         return Response({'status': True, 'detail': }, status=status.HTTP_200_OK)
-    #             # else:
-    #                 # return Response({'status': True, 'detail': 'You have no favourite orders yet'})
-    #     except Exception as e:
-    #         print("Error", e)
-    #         return Response({'status': False, 'detail': f"Error {e}"}, status=status.HTTP_204_NO_CONTENT)
-   
+    @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
+    def get(self, request, *args, **kwargs):
+       return super().get(request, *args, **kwargs)
+       
+       
     @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
     def post(self, request):
         if 'id' in request.data:
