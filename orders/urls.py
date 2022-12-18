@@ -41,7 +41,7 @@ from .views import (
     PlaceView,
 )
 
-from orders.order_views.book_seat_view import BookSeatView
+# from orders.order_views.book_seat_view import BookaSet
 
 urlpatterns = [
     path('orders/', OrderList.as_view()),
@@ -62,7 +62,7 @@ urlpatterns = [
     # path('orders/favourite/add/', FavOrderView.as_view(), name='post-favourite'),
     # path('orders/favourite/delete/', FavOrderView.as_view(), name='delete-favourite'),
 
-    path('orders/book-seat/<int:pk>/', BookSeatView.as_view(), name='book-seat'),
+    # path('orders/book-seat/', BookaSet.as_view(), name='book-seat'),
 
     # show my orders
     path('orders/my-orders/', MyOrdersListView.as_view(), name='my-orders'),

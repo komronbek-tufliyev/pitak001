@@ -9,7 +9,7 @@ User = get_user_model()
 
 
 class SeatSerializer(serializers.ModelSerializer):
-    user = ProfileSerializer()
+    user = ProfileSerializer(required=False)
     class Meta:
         model = Seats
         fields = '__all__'
@@ -17,10 +17,15 @@ class SeatSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         order = self.context['order']
+        seat = validated_data.get('seat', None)
         if user is not None and user.is_authenticated:
             if order is not None:
-                Seats.objects.create(user=user, order=order, )
-        return super().create(validated_data)
+                seat_obj = Seats.objects.create(user=user, order=order, seat=seat)
+                seat_obj.save()
+                order.passengers.add(seat_obj)
+                order.save()
+                return seat_obj
+        return None
   
 
 class PlaceSerializer(serializers.ModelSerializer):
@@ -59,16 +64,16 @@ class CreateOrderDisplaySerializer(serializers.ModelSerializer):
 
     to_place = serializers.CharField()
     to_place_district = serializers.CharField()
-    left_back_seat = ProfileSerializer()
-    right_back_seat = ProfileSerializer()
-    forward_seat = ProfileSerializer()
-    middle_seat = ProfileSerializer()
+    # left_back_seat = ProfileSerializer()
+    # right_back_seat = ProfileSerializer()
+    # forward_seat = ProfileSerializer()
+    # middle_seat = ProfileSerializer()
     seats = SeatSerializer(required=False)    # date = serializers.DateTimeField(format=settings.DATETIME_FORMAT, input_formats=None)
 
     class Meta:
         model = Order 
         ref_name = 'Order display'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'to_place_district', 'price', 'date', 'time', 'description', 'seats', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'to_place_district', 'price', 'date', 'time', 'description', 'seats', 'passengers', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
 class CreateOrderSerializer(serializers.ModelSerializer):
@@ -87,7 +92,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order 
         ref_name = 'Order'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'seats', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'seats','passengers', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
     def create(self, validated_data):
@@ -133,7 +138,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         ref_name = 'Order Serializer'
-        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'time', 'description', 'seats', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images', 'is_liked']
+        fields = ['id', 'name', 'owner', 'phone2', 'car', 'from_place', 'to_place', 'price', 'date', 'time', 'description', 'seats', 'passengers', 'is_driver', 'is_active', 'is_accepted', 'is_finished', 'is_paid', 'images', 'is_liked']
 
     def to_representation(self, instance):
         # from pprint import pprint
@@ -170,7 +175,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order 
         ref_name = 'Order'
-        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'seats', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
+        fields = ['id', 'name', 'car', 'phone2','from_place', 'to_place', 'price', 'date', 'time', 'description', 'seats', 'passengers', 'is_driver', 'is_active', 'is_paid', 'is_finished', 'is_accepted', 'is_canceled', 'images', 'uploaded_images']
         extra_kwargs = {"owner": {"read_only": True}}
 
     def update(self, instance, validated_data):

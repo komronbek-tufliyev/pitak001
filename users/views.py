@@ -39,9 +39,6 @@ class MyPagination(PageNumberPagination):
 
 User = get_user_model()
 
-# class UserView(generics.RetrieveAPIView):
-#     permission_classes = (permissions.IsAuthenticated,  )
-#     serializer_class = UserSerializer
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -146,10 +143,6 @@ class SendOTPView(APIView):
                 print("No phoneotp exists")
                 phone_otp = PhoneOTP.objects.create(phone=phone, otp=key)
             return Response({'message': 'OTP sent succesfully'}, status=status.HTTP_200_OK)
-
-            # phoneotp = PhoneOTP.objects.create(phone=phone, otp=key)
-            # phoneotp.save()
-            # return Response({'message': 'OTP sent succesfully'}, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response({'message': 'Error sending OTP'}, status=status.HTTP_400_BAD_REQUEST)
@@ -171,18 +164,6 @@ class RegisterView(generics.CreateAPIView):
                 phoneotp = phoneotp.first()
                 if phoneotp.is_verified:
                     print("Shitty otp is verified and doing nothing", phoneotp.is_verified)
-                    # name = None 
-                    # is_driver = False
-                    # if 'name' in request.data:
-                    #     name = request.data.get('name')
-                    # if 'is_driver' in request.data:
-                    #     is_driver = request.data.get('is_driver')
-                    # data: dict = {
-                    #     'phone': phone,
-                    #     'password': phoneotp.otp,
-                    #     'name': name,
-                    #     'is_driver': is_driver
-                    # }
                     request.POST._mutable = True
                     request.data['phone']=phone
                     request.POST._mutable = False
@@ -234,15 +215,7 @@ class LoginView(APIView):
                     if user.exists():
                         user = user.first()
                         print("User exists", user)
-                        # print("User checked_password = ", user.check_password(password))
-                        # if not refresh_token:
-                        #     refresh_token = RefreshToken()
-                        # request.data._mutable = True
-                        # request.data['refresh'] = refresh_token
-                        # request.data._mutable = False
-                        # serializer = LoginSerializer(data=request.data)
-                        # serializer.is_valid(raise_exception=True)
-                        # token = get_tokens_for_user(user)
+                       
                         if user.check_password(password):
                             token = get_tokens_for_user(user)
                             print("Token", token)
@@ -261,7 +234,7 @@ class LoginView(APIView):
 
 
 class UsersListView(generics.ListAPIView):
-    permission_classes = (permissions.IsAuthenticated,  )
+    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
     serializer_class = UserSerializer
     queryset = User.objects.all()   
     http_method_names = ['get']
@@ -292,17 +265,6 @@ class UpdateUserView(generics.UpdateAPIView):
         if 'phone2' in request.data:
             request.data['phone2'] = request.data['phone2'].replace('+', '')
         return super().update(request, *args, **kwargs)
-
-    # def partial_update(self, request, *args, **kwargs):
-    #     # replace number + with empty string in request.data
-    #     if 'phone' in request.data:
-    #         request.data['phone'] = request.data['phone'].replace('+', '')
-    #     if 'phone2' in request.data:
-    #         request.data['phone2'] = request.data['phone2'].replace('+', '')
-    #     return super().partial_update(request, *args, **kwargs)
-    
-    
-
 
     
 class DeleteUserView(generics.DestroyAPIView):

@@ -122,7 +122,7 @@ class OrderUpdateView(generics.UpdateAPIView):
 
     permission_classes = [permissions.IsAuthenticated]
 
-    @swagger_auto_schema(request_body=CreateOrderDisplaySerializer)
+    # @swagger_auto_schema(request_body=CreateOrderDisplaySerializer)
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         phone2 = request.data.get('phone2', None)
@@ -253,9 +253,9 @@ class FavOrderView(generics.ListCreateAPIView):
         # Post method addes user id to order.favourite m2m field
         # Delete method removes user id from order.favourite m2m field 
     """
-    serializer_class = OrderSerializer
+    serializer_class = DisplayFavOrderSerializer
     permission_classes = [permissions.IsAuthenticated]
-    http_method_names = ['get', 'delete', 'post', 'patch', 'put']
+    # http_method_names = ['get', 'delete', 'post', 'patch', 'put']
 
     def get_queryset(self):
         if self.request.user is not None:
@@ -263,12 +263,12 @@ class FavOrderView(generics.ListCreateAPIView):
             return fav_orders
         return super().get_queryset()
 
-    @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
+    # @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
     def get(self, request, *args, **kwargs):
        return super().get(request, *args, **kwargs)
        
        
-    @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
+    # @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
     def post(self, request):
         if 'id' in request.data:
             order = get_object_or_404(Order, id=request.data.get('id'))
@@ -288,7 +288,7 @@ class FavOrderView(generics.ListCreateAPIView):
         print("Anaqa...", "error chiqdi bro")    
         return Response({'status': False, 'message': 'E karochi xatolik borde, kodingni to\'g\'irla keyin ishlayman'})
     
-    @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
+    # @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
     def delete(self, request):
         if 'id' in request.data:
             user = request.user

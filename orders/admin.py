@@ -4,6 +4,7 @@ from .models import (
     OrderComment,
     OrderImage,
     Place,
+    Seats,
     # Likes,
 )
 from django.utils.translation import gettext_lazy as _
@@ -42,5 +43,6 @@ admin.site.register(Order, OrderAdmin)
 
 admin.site.register(OrderImage, OrderImageAdmin)
 admin.site.unregister(Group)
+admin.site.register(Seats)
 # admin.site.register(Likes)
 
