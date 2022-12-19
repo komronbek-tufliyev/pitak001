@@ -59,34 +59,13 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         return instance
 
 
-
-
-
-    # def validate_password(self, password):
-    #     if not password:
-    #         raise serializers.ValidationError('Password is required')
-    #     return password
-    
-    # def validate_phone(self, phone):
-    #     if not phone:
-    #         raise serializers.ValidationError('Phone is required')
-    #     return phone    
-
-
 class ValidateSendOTPSerializer(serializers.Serializer):
-    phone = serializers.CharField(max_length=13, allow_null=False, min_length=13, help_text=_("Telefon raqam: 998XX123ZZYY"))
+    phone = serializers.CharField(max_length=13, allow_null=False, min_length=12, help_text=_("Telefon raqam: 998XX123ZZYY"))
     def validate_phone(self, phone):
         if not phone:
             raise serializers.ValidationError('Phone number is required')
         
         return phone
-
-    # def to_representation(self, instance):
-    #     representation_dict: dict = {
-    #         'status': "True",
-    #         'detail': 'Otp sent succesfully'
-    #     }
-    #     return representation_dict 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         print("Data respresentation", data)
@@ -94,7 +73,7 @@ class ValidateSendOTPSerializer(serializers.Serializer):
         return data
 
 class ValidateOTPSerializer(serializers.Serializer):
-    phone = serializers.CharField(max_length=13, help_text=_("Telefon raqam: 998XX123ZZYY"),allow_null=False)
+    phone = serializers.CharField(max_length=13, help_text=_("Telefon raqam: 998XX123ZZYY"), allow_null=False)
     otp = serializers.CharField(max_length=4, min_length=4, help_text=_("Bir martalik yuborilgan kodd"), allow_null=False)
 
     def validate(self, attrs):
@@ -115,6 +94,9 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Add custom claims
         token['name'] = user.name
         token['phone'] = user.phone
+        token['phone2'] = user.phone2
+        token['image'] = user.image
+        token['is_driver'] = user.is_driver
         token['is_staff'] = user.is_staff
         token['is_active'] = user.is_active
         token['is_superuser'] = user.is_superuser

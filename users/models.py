@@ -48,13 +48,14 @@ class User(AbstractBaseUser):
         super().save()
 
         try:
+            if self.image is not None:
 
-            img = Image.open(self.image.path)
+                img = Image.open(self.image.path)
 
-            if img.height > 100 or img.width > 100:
-                new_img = (100, 100)
-                img.thumbnail(new_img)
-                img.save(self.image.path)
+                if img.height > 100 or img.width > 100:
+                    new_img = (100, 100)
+                    img.thumbnail(new_img)
+                    img.save(self.image.path)
         except:
             print("Error occured in users models.py", Exception)
             pass

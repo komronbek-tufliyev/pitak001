@@ -20,11 +20,16 @@ class SeatSerializer(serializers.ModelSerializer):
         seat = validated_data.get('seat', None)
         if user is not None and user.is_authenticated:
             if order is not None:
-                seat_obj = Seats.objects.create(user=user, order=order, seat=seat)
-                seat_obj.save()
-                order.passengers.add(seat_obj)
-                order.save()
-                return seat_obj
+                old_seat = Seats.objects.filter(order=order, user=user, seat=seat)
+                if not old_seat.exists():
+                    seat_obj = Seats.objects.create(user=user, order=order, seat=seat)
+                    seat_obj.save()
+                    order.passengers.add(seat_obj)
+                    order.save()
+                    return seat_obj
+                else:
+                    raise ValueError(_(""))
+                
         return None
   
 
@@ -246,8 +251,9 @@ class FavouriteOrderSerializer(serializers.ModelSerializer):
                 return user
         return user
     
-    def to_representation(self, instance):
-        return super().to_representation(instance)
+    # def to_representation(self, instance):
+    #     print("Data", instance)
+    #     return super().to_representation(instance)
 
 class DisplayFavOrderSerializer(serializers.Serializer):
     id = serializers.IntegerField()

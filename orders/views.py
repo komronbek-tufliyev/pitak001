@@ -46,29 +46,6 @@ class OrderList(generics.ListAPIView):
     http_method_names = ['get']
     pagination_class = MyPagination
 
-    # def get(self, request, *args, **kwargs):
-    #     orders =  super().get(request, *args, **kwargs)
-    #     user = self.request.user
-    #     new_update_data = []
-    #     if user is not None:
-    #         print("User is not None")
-    #         fav_orders = user.favourite.all()
-    #         if not fav_orders:
-    #             print("No fav orders")
-    #             return orders
-    #         orders_data = orders.data['results']
-    #         for order in orders_data:
-    #             for fav_order in fav_orders:
-    #                 if order['id'] == fav_order.pk:
-    #                     new_update_data.append({'is_liked': True, 'order': order})
-    #                 else:
-    #                     new_update_data.append({'is_liked': False, 'order': order})
-
-    #         orders.data['results'] = new_update_data
-    #         # return orders
-    #     return orders
-                    
-
 
 class OrderDetail(generics.RetrieveAPIView):
     queryset = Order.objects.prefetch_related('images')
@@ -247,27 +224,24 @@ class FilterByRegionView(generics.ListAPIView):
             queryset =  Place.objects.filter(region=region_by).all()
         return queryset
 
-class FavOrderView(generics.ListCreateAPIView):
+class FavOrderView(generics.ListAPIView):
     """
         Favourite Order View has two methods: post and delete
         # Post method addes user id to order.favourite m2m field
         # Delete method removes user id from order.favourite m2m field 
     """
-    serializer_class = DisplayFavOrderSerializer
+    serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = MyPagination
     # http_method_names = ['get', 'delete', 'post', 'patch', 'put']
 
     def get_queryset(self):
         if self.request.user is not None:
+            print("User is not None")
             fav_orders = self.request.user.favourite.all()
             return fav_orders
         return super().get_queryset()
 
-    # @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
-    def get(self, request, *args, **kwargs):
-       return super().get(request, *args, **kwargs)
-       
-       
     # @swagger_auto_schema(request_body=DisplayFavOrderSerializer)
     def post(self, request):
         if 'id' in request.data:
