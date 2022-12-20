@@ -71,22 +71,11 @@ class Order(models.Model):
     car = models.CharField(_('car'), max_length=50, blank=True, null=True, help_text=_("Mashina nomi, M: Gentra"))
     car_number = models.CharField(_('car_number'), max_length=50, blank=True, null=True, help_text=_("Mashina raqami(shart emas), ixtiyoriy"))
     description = models.TextField(_('description'), blank=True, null=True, help_text=_("Buyurtma haqida qo'shimcha izoh"))
-    # from_place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='from_place')
-    # to_place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='to_place')
     from_place = models.CharField(max_length=100, verbose_name=_('From Place'), choices=REGION_CHOICES, help_text=_("Joy nomi, qayerdan..."))
-    # to_place = models.CharField(max_length=100, verbose_name=_('To Place'), choices=REGION_CHOICES, help_text=_("Joy nomi, qayerga..."))
     to_place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='to_place', help_text=_("Joy nomi, qayerga..."))
     date = models.DateField(_('date'), blank=True, null=True, help_text=_("Buyurtma vaqti(ketish vaqti) YYYY-MM-DD HH:MM. M: 2022-12-25 09:00"))
     time = models.TimeField(_('time'), blank=True, null=True, help_text=_("Soat: HH:MM:SS, 09:00:00"))
     price = models.IntegerField(_('price'), blank=True, null=True, help_text=_("Narxi"))
-    # left_back_free = models.BooleanField(_('orqa chap o\'rindiq'), default=True, help_text=_("Mashinaning chap orqa o'rindig'i bo'shmi?"))
-    # right_back_free = models.BooleanField(_('orqa o\'ng o\'rindiq'), default=True, help_text=_("Mashinaning o'ng orqa o'rindig'i bo'shmi?"))
-    # forward_free = models.BooleanField(_('haydovchi yonidagi o\'rindiq'), default=True, help_text=_("Haydovchi yonidagi o'rindig'i bo'shmi?"))
-    # middle_free = models.BooleanField(_('orqa o\'rtadagi o\'rindiq'), default=True, help_text=_("Mashinaning o'rta o'rindig'i bo'shmi?"))
-    # left_back_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='leftbackseat') # default=None
-    # right_back_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rightbackseat') # default=None
-    # forward_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='forwardseat') # default=None
-    # middle_seat = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='middleseat') # default=None
     passengers = models.ManyToManyField('Seats', blank=True, help_text=_("Yo'lovchilar to'plami"), related_name='order_passengers')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -96,7 +85,6 @@ class Order(models.Model):
     is_finished = models.BooleanField(default=False, help_text=_("Status: bajarilganmi"))
     is_canceled = models.BooleanField(default=False, help_text=_("Status: rad etilganmi"))
     is_paid = models.BooleanField(default=False, help_text=_("Status: to'langanmi"))
-    # is_driver = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         if self.name:
@@ -150,23 +138,8 @@ class Order(models.Model):
         verbose_name_plural = _('Orders')
 
 
-# SEATS MODEL OF CAR
-# class SeatsModel(models.Model):
-#     left_back_seat = models.OneToOneField(User, verbose_name=_("orqadagi chap o'rindiq"), on_delete=models.SET_NULL, null=True, blank=True, related_name='leftbackseat_seatsmodel')
-#     right_back_seat = models.OneToOneField(User, verbose_name=_("orqadagi o'ng o'rindiq"), on_delete=models.SET_NULL, null=True, blank=True, related_name='rightbackseat_seatsmodel') # default=None
-#     forward_seat = models.OneToOneField(User, verbose_name=_("haydovchi yonidagi o'rindiq"), on_delete=models.SET_NULL, null=True, blank=True, related_name='forwardseat_seatsmodel') # default=None
-#     middle_seat = models.OneToOneField(User, verbose_name=_("orqadagi o'rta o'rindiq"), on_delete=models.SET_NULL, null=True, blank=True, related_name='middleseat_seatsmodel') # default=None
-#     order = models.OneToOneField(Order, verbose_name=_("Order "), on_delete=models.CASCADE, related_name='order_seatsmodel')
-
-#     def __str__(self) -> str:
-#         return f"order_id: {self.order.pk} + seats_id: {self.pk}"
-
 class Seats(models.Model):
     SEAT_CHOICES = (
-        # ('left_back', 'left_back'),
-        # ('right_back', 'right_back'),
-        # ('forward', 'forward'),
-        # ('middle', 'middle')
         (1, 'forward'), 
         (2, 'right_back'),
         (3, 'middle'), 

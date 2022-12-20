@@ -50,12 +50,16 @@ class DeleteSeatView(APIView):
         user = request.user
         order_id = request.data.get('order', None)
         seat = request.data.get('seat', None)
+        if seat is None or order_id is None:
+            return Response({'status': False, 'detail': 'order va seat berilishi shart'}, status=status.HTTP_400_BAD_REQUEST)
         if order_id is not None:
             order =  Order.objects.filter(pk=order_id)
             if order.exists():
                 order = order.first()
-                old_seat = Seats.objects.filter(order=order, user=user, seat=seat)
+                old_seat = Seats.objects.filter(order=order, seat=seat)
                 if old_seat.exists():
+                    if old_seat.first().user != user:
+                        return Response({'status': False, 'detail': 'Bu joyni o\'chirishga vakolatingiz yo\'q'}, status=status.HTTP_403_FORBIDDEN)
                     old_seat = old_seat.first().pk
                     Seats.objects.filter(pk=old_seat).first().delete()
                     return Response({'status':True, 'detail': 'Tanlangan joy muvaffaqqiyatli bekor qilindi'})
