@@ -234,6 +234,9 @@ class FavOrderView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = MyPagination
     # http_method_names = ['get', 'delete', 'post', 'patch', 'put']
+    
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         if self.request.user is not None:

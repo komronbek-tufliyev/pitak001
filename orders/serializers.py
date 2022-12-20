@@ -10,9 +10,32 @@ User = get_user_model()
 
 class SeatSerializer(serializers.ModelSerializer):
     user = ProfileSerializer(required=False)
+    SEAT_CHOICES = (
+        # ('left_back', 'left_back'),
+        # ('right_back', 'right_back'),
+        # ('forward', 'forward'),
+        # ('middle', 'middle')
+        (1, 'forward'), 
+        (2, 'right_back'),
+        (3, 'middle'), 
+        (4, 'left_back'),
+    )
+    seat = serializers.ChoiceField(choices=SEAT_CHOICES)
     class Meta:
         model = Seats
         fields = '__all__'
+
+    def custom_validation(self, validated_data):
+        user = self.context['request'].user
+        order = self.context['order']
+        seat = validated_data.get('seat', None)
+        if user is not None and user.is_authenticated:
+            if order is not None:
+                old_seat = Seats.objects.filter(order=order, user=user, seat=seat)
+                if old_seat.exists():
+                    return old_seat.first()
+
+        return False
 
     def create(self, validated_data):
         user = self.context['request'].user
@@ -24,14 +47,24 @@ class SeatSerializer(serializers.ModelSerializer):
                 if not old_seat.exists():
                     seat_obj = Seats.objects.create(user=user, order=order, seat=seat)
                     seat_obj.save()
-                    order.passengers.add(seat_obj)
+                    order.passengers.set(seat_obj)
                     order.save()
+                    # order.pasengers.set('')
                     return seat_obj
                 else:
-                    raise ValueError(_(""))
-                
+                    raise ValueError(_("This seat is already taken"))       
         return None
-  
+
+    # def delete(self, validated_data):
+    #     old_seat = self.custom_validation(validated_data)
+    #     if old_seat:
+    #         Seats.objects.filter(pk=old_seat.pk).first().delete()
+    #         return {"message": "Success"}
+    #     else:
+    #         None
+
+
+
 
 class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
