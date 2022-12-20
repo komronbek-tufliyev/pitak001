@@ -22,14 +22,17 @@ class BookaSet(generics.CreateAPIView):
             if order.exists():
                 order = order.first()
                 serializer = SeatSerializer(data=request.data, context={'request': request, 'order': order})
-                old_seat = Seats.objects.filter(order=order, seat=request.data.get('order'), user=user)
+                old_seat = Seats.objects.filter(order=order, seat=request.data.get('seat'), user=user)
                 if not old_seat.exists():
+                    print("Bunday order mavjud emas va davom etyapman")
                     serializer = SeatSerializer(data=request.data, context={'request': request, 'order': order})
                     if serializer.is_valid(raise_exception=True):
                         try:
                             serializer.save()
+                            print("Everything is working correctly")
                             return Response({'status': True, 'detail': serializer.data}, status=status.HTTP_201_CREATED)
                         except Exception as e:
+                            print("Exception is working on /orders/seats/create/ route")
                             return  Response({'status': False, 'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         return  Response({'status': False, 'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -61,21 +64,25 @@ class DeleteSeatView(APIView):
             return Response({'status': False, 'detail': 'Bunday order topilmadi'}, status=status.HTTP_404_NOT_FOUND)
         return Response({"status": False, 'detail': 'Nimadur xato ketdi'}, status=status.HTTP_400_BAD_REQUEST)
 
-class GetSeatView(generics.ListAPIView):
-    serializer_class = SeatSerializer
+class GetSeatView(APIView):
+    # serializer_class = SeatSerializer
     permission_classes = [permissions.AllowAny]
     http_method_names = ['get']
     
-    def get_queryset(self):
-        user = self.request.user
-        if 'order_id' in self.kwargs:
-            order_id = self.kwargs.get('order_id')
+    def get(self, request, format=None):
+        order_id = request.data.get('order', None)
+        if order_id is not None:
             order = Order.objects.filter(pk=order_id)
             if order.exists():
                 order = order.first()
-                seat = Seats.objects.filter(order=order)
-                return seat
-        return None
+                seat = Seats.objects.filter(order=order).all()
+                if seat is not None:
+                    serializer = SeatSerializer(seat, many=True)
+                    return Response(serializer.data)
+                else:
+                    return Response({'status': False, 'detail': []}, status=status.HTTP_200_OK)
+            return Response({'status': False, 'detail': 'Bunday id-ga ega order topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'status': False, 'detail': 'order must required'}, status=status.HTTP_400_BAD_REQUEST)
+            
 
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)

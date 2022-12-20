@@ -177,7 +177,7 @@ class Seats(models.Model):
     seat = models.CharField(max_length=20, choices=SEAT_CHOICES)
 
     def __str__(self) -> str:
-        return f"{self.seat}/ order: {self.order.pk}, user: {self.user.pk}"  
+        return f"{self.pk}, seat: {self.seat} order: {self.order.pk}, user: {self.user.pk}"  
 
 
 class OrderComment(models.Model):

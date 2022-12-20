@@ -47,15 +47,20 @@ class SeatSerializer(serializers.ModelSerializer):
                 if not old_seat.exists():
                     seat_obj = Seats.objects.create(user=user, order=order, seat=seat)
                     seat_obj.save()
-                    order.passengers.set(seat_obj)
+                    # order.passengers.set(seat_obj)
+                    order.save()
+                    order.passengers.add(seat_obj)
                     order.save()
                     # order.pasengers.set('')
                     return seat_obj
                 else:
+                    print("Already taken")
                     raise ValueError(_("This seat is already taken"))  
             else:
-                raise ValueError(_("Bunday id-ga ega order topilmadi :("))     
+                print("Bunday id-ga ega order mavjud emas")
+                raise ValueError(_("Bunday id-ga ega order mavjud emas :("))     
         else:
+            print("User is None or not authenticated")
             raise ValueError(_("Joyni yaratishni imkoni bo'lmadi, backendchiga murojaat qiling"))
 
     # def delete(self, validated_data):
@@ -140,6 +145,8 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         # print("Validated data", validated_data)
         owner = self.context.get('owner')
         uploaded_images = validated_data.pop('uploaded_images', None)
+        passengers = validated_data.pop('passengers', None)
+        
         # to_place = validated_data.pop('to_place', None)
         # to_place_district = validated_data.pop('to_place_district', None)
         # if to_place and to_place_district:
@@ -159,6 +166,8 @@ class CreateOrderSerializer(serializers.ModelSerializer):
                 # print("Order image", image)
                 new_order_image = OrderImage.objects.create(order=new_order, image=image)
 
+        if passengers is not None:
+            new_order.passengers.set(passengers)
         return new_order
 
     def to_representation(self, instance):
