@@ -26,8 +26,11 @@ class BookaSet(generics.CreateAPIView):
                 if not old_seat.exists():
                     serializer = SeatSerializer(data=request.data, context={'request': request, 'order': order})
                     if serializer.is_valid(raise_exception=True):
-                        serializer.save()
-                        return Response({'status': True, 'detail': serializer.data}, status=status.HTTP_201_CREATED)
+                        try:
+                            serializer.save()
+                            return Response({'status': True, 'detail': serializer.data}, status=status.HTTP_201_CREATED)
+                        except Exception as e:
+                            return  Response({'status': False, 'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         return  Response({'status': False, 'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                 return Response({'status': False, 'detail': 'Bu joy allaqachon band qilingan'}, status=status.HTTP_400_BAD_REQUEST)

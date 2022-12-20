@@ -53,7 +53,7 @@ class SeatSerializer(serializers.ModelSerializer):
                     return seat_obj
                 else:
                     raise ValueError(_("This seat is already taken"))       
-        return None
+
 
     # def delete(self, validated_data):
     #     old_seat = self.custom_validation(validated_data)
