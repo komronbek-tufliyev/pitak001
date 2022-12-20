@@ -52,8 +52,11 @@ class SeatSerializer(serializers.ModelSerializer):
                     # order.pasengers.set('')
                     return seat_obj
                 else:
-                    raise ValueError(_("This seat is already taken"))       
-
+                    raise ValueError(_("This seat is already taken"))  
+            else:
+                raise ValueError(_("Bunday id-ga ega order topilmadi :("))     
+        else:
+            raise ValueError(_("Joyni yaratishni imkoni bo'lmadi, backendchiga murojaat qiling"))
 
     # def delete(self, validated_data):
     #     old_seat = self.custom_validation(validated_data)
