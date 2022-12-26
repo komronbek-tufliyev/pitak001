@@ -48,8 +48,8 @@ class DeleteSeatView(APIView):
 
     def delete(self, request, *args, **kwargs):
         user = request.user
-        order_id = self.kwargs.get('order', None)
-        seat = self.kwargs.get('seat', None)
+        order_id = self.kwargs.get('order_id', None)
+        seat = self.kwargs.get('seat_number', None)
         if seat is None or order_id is None:
             return Response({'status': False, 'detail': 'order va seat berilishi shart'}, status=status.HTTP_400_BAD_REQUEST)
         if order_id is not None:
@@ -73,8 +73,8 @@ class GetSeatView(APIView):
     permission_classes = [permissions.AllowAny]
     http_method_names = ['get']
     
-    def get(self, request, format=None):
-        order_id = self.kwargs.get('order', None)
+    def get(self, request, format=None, *args, **kwargs):
+        order_id = self.kwargs.get('order_id', None)
         if order_id is not None:
             order = Order.objects.filter(pk=order_id)
             if order.exists():
