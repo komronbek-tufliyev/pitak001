@@ -62,7 +62,7 @@ class DeleteSeatView(APIView):
                         return Response({'status': False, 'detail': 'Bu joyni o\'chirishga vakolatingiz yo\'q'}, status=status.HTTP_403_FORBIDDEN)
                     old_seat = old_seat.first().pk
                     Seats.objects.filter(pk=old_seat).first().delete()
-                    return Response({'status':True, 'detail': 'Tanlangan joy muvaffaqqiyatli bekor qilindi'})
+                    return Response({'status':True, 'detail': 'Tanlangan joy muvaffaqqiyatli bekor qilindi'}, status=status.HTTP_200_OK)
 
                 return Response({'status': True, 'detail': 'Bunday joy tanlanmagan'}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'status': False, 'detail': 'Bunday order topilmadi'}, status=status.HTTP_404_NOT_FOUND)
@@ -82,7 +82,7 @@ class GetSeatView(APIView):
                 seat = Seats.objects.filter(order=order).all()
                 if seat is not None:
                     serializer = SeatSerializer(seat, many=True)
-                    return Response(serializer.data)
+                    return Response({'status': True, 'detail': serializer.data}, status=status.HTTP_200_OK)
                 else:
                     return Response({'status': False, 'detail': []}, status=status.HTTP_200_OK)
             return Response({'status': False, 'detail': 'Bunday id-ga ega order topilmadi'}, status=status.HTTP_404_NOT_FOUND)
