@@ -67,8 +67,8 @@ urlpatterns = [
     # path('orders/favourite/delete/', FavOrderView.as_view(), name='delete-favourite'),
 
     path('orders/seats/create/', BookaSet.as_view(), name='book-car-seat'),
-    path('orders/seats/', GetSeatView.as_view(), name='get-car-seats'),
-    path('orders/seats/delete/', DeleteSeatView.as_view(), name='unbook-seat'),
+    path('orders/seats/<int:order_id>/', GetSeatView.as_view(), name='get-car-seats'),
+    path('orders/seats/delete/<int:order_id>/<int:seat_number>/', DeleteSeatView.as_view(), name='unbook-seat'),
 
     # show my orders
     path('orders/my-orders/', MyOrdersListView.as_view(), name='my-orders'),
