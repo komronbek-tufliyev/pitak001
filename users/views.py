@@ -16,9 +16,15 @@ from .serializers import (
     MyTokenObtainPairSerializer,
     LogoutSerializer,
     UpdateUserSerializer,
+    DeviceSerializer,
     
 )
-from .models import PhoneOTP, User
+from .models import (
+    PhoneOTP, 
+    User,
+    Device
+)
+
 from .utils import send_sms
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -324,3 +330,55 @@ class APILogoutView(APIView):
         token.blacklist()
         print({"status": "OK, goodbye"})
         return Response({"status": "OK, goodbye"}, status=status.HTTP_200_OK)
+
+
+class DeviceCreateAPIView(generics.CreateAPIView):
+    serializer_class = DeviceSerializer
+    queryset = Device.objects.all()
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        device_obj = super().post(request, *args, **kwargs)
+        user = self.request.user 
+        if user is not None:
+            device_obj = Device.objects.create(**request.data)
+            print("User", user)
+            print("Device obj", device_obj)
+            device_object = user.devices.add(device_obj.pk)
+            print("Device object ", device_object)
+            return Response({'m': 'created'}, status=status.HTTP_201_CREATED)
+
+        return device_obj
+
+class DeviceDestroyAPIView(generics.DestroyAPIView):
+    serializer_class = DeviceSerializer
+    queryset = Device.objects.all()
+    permission_classes = [permissions.AllowAny]
+
+    def delete(self, request, *args, **kwargs):
+        device_obj = self.get_object()
+        # device_obj = super().delete(request, *args, **kwargs)
+
+        try:
+            user = self.request.user 
+            if user is not None:
+                user.devices.delete(device_obj)
+            else:
+                print("User is not authenticated", user)
+        except Exception as e:
+            print("Error while deleting device token from user object", e)
+            pass 
+        return super().delete(request, *args, **kwargs)
+
+class DeviceListAPIView(generics.ListAPIView):
+    serializer_class = DeviceSerializer
+    queryset = Device.objects.all()
+    permission_classes = [permissions.AllowAny]
+    pagination_class = MyPagination
+
+    def get_queryset(self):
+        if self.request.user is not None:
+            user_devices = self.request.user.devices.values_list('pk', flat=True)
+            qs = Device.objects.filter(pk__in = user_devices)
+            return qs 
+        return self.get_queryset()

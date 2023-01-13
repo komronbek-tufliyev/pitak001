@@ -4,6 +4,7 @@ from .models import (
     PhoneOTP, 
     SMSLog, 
     SMSToken,
+    Device,
 )
 from django.contrib.auth.models import Group
 from rest_framework_simplejwt import tokens, token_blacklist
@@ -15,6 +16,10 @@ admin.site.register(SMSToken)
 # admin.site.unregister(Group)
 
 
+class DeviceAdmin(admin.ModelAdmin):
+    list_display = ['id', 'device_type', 'device_name', 'device_token']
+
+admin.site.register(Device, DeviceAdmin)
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'phone', 'is_driver', 'is_active', 'is_superuser', 'get_favourites']

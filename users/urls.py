@@ -11,6 +11,9 @@ from .views import (
     UpdateUserView,
     DeleteUserView,
     APILogoutView,
+    DeviceCreateAPIView,
+    DeviceDestroyAPIView,
+    DeviceListAPIView,
 )
 
 # router = routers.DefaultRouter()
@@ -32,6 +35,10 @@ urlpatterns = [
     path('users/register/', RegisterView.as_view(), name='register'),
     path('users/login/', LoginView.as_view(), name='login'),
     path('users/logout/', APILogoutView.as_view(), name='logout'),
+
+    path('devices/', DeviceListAPIView.as_view(), name='devices'),
+    path('devices/create/', DeviceCreateAPIView.as_view(), name='device-create'),
+    path('devices/<int:pk>/delete/', DeviceDestroyAPIView.as_view(), name='device-delete'),
 ] 
 
 # urlpatterns += router.urls

@@ -1,154 +1,57 @@
-from .models import (
-    Order,  
-    OrderComment,
-    OrderFile,
-    Place,
-)
-from django.core.signals import request_finished, request_started
 from django.dispatch import receiver
-from django.utils.translation import gettext_lazy as _
-from django.contrib.auth import get_user_model
-from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
-from django.dispatch import receiver
+from django.core.signals import request_finished
+from django.contrib.auth.signals import user_logged_in, user_logged_out
+from django.db.models.signals import post_save, post_delete
 
-User = get_user_model()
+from .models import (
+    Order,
+    Seats,
+    Place
+)
+from users.models import User
+print("Running signals.py before imporing fcm_manager")
+
+from .local_libs import FCMManager as fcm
+
+print("Running signals.py")
 
 @receiver(post_save, sender=Order)
-def order_post_save(sender, instance, created, **kwargs):
+def create_order(sender, instance, created, **kwargs):
     if created:
-        print('order_post_save')
-        print(instance)
-        print(created)
-        print(kwargs)
-        print('order_post_save')
-
-@receiver(post_save, sender=OrderComment)
-def order_comment_post_save(sender, instance, created, **kwargs):
+        print("Order created ", instance)
+        try:
+            order_owner = instance.owner
+            print("Order owner", order_owner)
+        except Exception as e:
+            print("error ", e)
+            pass
+        print("Order created", instance)
+        print("order sender is ", sender)
+    
+@receiver(post_save, sender=Seats)
+def create_seats(sender, instance, created, **kwargs):
     if created:
-        print('order_comment_post_save')
-        print(instance)
-        print(created)
-        print(kwargs)
-        print('order_comment_post_save')
-
-@receiver(post_save, sender=OrderFile)
-def order_file_post_save(sender, instance, created, **kwargs):
-    if created:
-        print('order_file_post_save')
-        print(instance)
-        print(created)
-        print(kwargs)
-        print('order_file_post_save')
-
-@receiver(post_save, sender=Place)
-def place_post_save(sender, instance, created, **kwargs):
-    if created:
-        print('place_post_save')
-        print(instance)
-        print(created)
-        print(kwargs)
-        print('place_post_save')
-
-@receiver(pre_save, sender=Order)
-def order_pre_save(sender, instance, **kwargs):
-    print('order_pre_save')
-    print(instance)
-    print(kwargs)
-    print('order_pre_save')
-
-@receiver(pre_save, sender=OrderComment)
-def order_comment_pre_save(sender, instance, **kwargs):
-    print('order_comment_pre_save')
-    print(instance)
-    print(kwargs)
-    print('order_comment_pre_save')
-
-@receiver(pre_save, sender=OrderFile)
-def order_file_pre_save(sender, instance, **kwargs):
-    print('order_file_pre_save')
-    print(instance)
-    print(kwargs)
-    print('order_file_pre_save')
-
-@receiver(pre_save, sender=Place)
-def place_pre_save(sender, instance, **kwargs):
-    print('place_pre_save')
-    print(instance)
-    print(kwargs)
-    print('place_pre_save')
-
-@receiver(pre_delete, sender=Order)
-def order_pre_delete(sender, instance, **kwargs):
-    print('order_pre_delete')
-    print(instance)
-    print(kwargs)
-    print('order_pre_delete')
-
-@receiver(pre_delete, sender=OrderComment)
-def order_comment_pre_delete(sender, instance, **kwargs):
-    print('order_comment_pre_delete')
-    print(instance)
-    print(kwargs)
-    print('order_comment_pre_delete')
-
-@receiver(pre_delete, sender=OrderFile)
-def order_file_pre_delete(sender, instance, **kwargs):
-
-    print('order_file_pre_delete')
-    print(instance)
-    print(kwargs)
-    print('order_file_pre_delete')
-
-@receiver(pre_delete, sender=Place)
-def place_pre_delete(sender, instance, **kwargs):
-    print('place_pre_delete')
-    print(instance)
-    print(kwargs)
-    print('place_pre_delete')
+        try:
+            title = f"Sizning mashinangizga yana bir odam buyurtma berdi"
+            message = f"Buyurtma beruvchi tel: {instance.user.phone}"
+            seat_owner = instance.order.owner
+            registration_tokens = seat_owner.get_device_tokens()
+            print("Seat owner", seat_owner)
+            print("Device tokens", seat_owner.get_device_tokens())
+            fcm.send_push(title=title, message=message, registraton_token=registration_tokens)
+        except Exception as e:
+            print("error ", e)
+            pass
+        print("Seats created instance: ", instance)
+        print("Seats created sender: ", sender)
 
 @receiver(post_delete, sender=Order)
-def order_post_delete(sender, instance, **kwargs):
-    print('order_post_delete')
-    print(instance)
-    print(kwargs)
-    print('order_post_delete')
+def delete_order(sender, instance, *args, **kwargs):
+    print("Order deleted instance: ", instance)
+    print("Order deleted sender: ", sender)
 
-@receiver(post_delete, sender=OrderComment)
-def order_comment_post_delete(sender, instance, **kwargs):
-    print('order_comment_post_delete')
-    print(instance)
-    print(kwargs)
-    print('order_comment_post_delete')
-
-@receiver(post_delete, sender=OrderFile)
-def order_file_post_delete(sender, instance, **kwargs):
-    print('order_file_post_delete')
-    print(instance)
-    print(kwargs)
-    print('order_file_post_delete')
-
-@receiver(post_delete, sender=Place)
-def place_post_delete(sender, instance, **kwargs):
-    print('place_post_delete')
-    print(instance)
-    print(kwargs)
-    print('place_post_delete')
-
-
-request_finished.connect(order_post_save)
-# request_started.connect(order_comment_post_save)
-request_finished.connect(order_file_post_save)
-# request_started.connect(place_post_save)
-request_finished.connect(order_pre_save)
-# request_started.connect(order_comment_pre_save)
-request_finished.connect(order_file_pre_save)
-# request_started.connect(place_pre_save)
-request_finished.connect(order_pre_delete)
-# request_started.connect(order_comment_pre_delete)
-request_finished.connect(order_file_pre_delete)
-# request_started.connect(place_pre_delete)
-request_finished.connect(order_post_delete)
-
-# request_started.connect(order_comment_post_delete)
-request_finished.connect(order_file_post_delete)
-# request_started.connect(place_post_delete)
+@receiver(post_delete, sender=Seats)
+def delete_seats(sender, instance, *args, **kwargs):
+    print("Deleted seats instance: ", instance)
+    print("Deleted seats sender: ", sender)
+    

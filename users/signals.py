@@ -1,154 +1,42 @@
-from django.db.models.signals import post_save, pre_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
-from django.contrib.auth import get_user_model
-from django.core.signals import request_finished, request_started, got_request_exception
-from .models import (
-    User,
-    SMSLog,
-    PhoneOTP,
-    SMSToken,
-)
+from django.db.models.signals import post_delete, post_save
+from django.contrib.auth.signals import user_logged_in, user_logged_out
 
-User = get_user_model()
-
-@receiver(post_save, sender=User)
-def user_post_save(sender, instance, created, **kwargs):
-    if created:
-        print('user_post_save')
-        print(instance)
-        print(created)
-        print(kwargs)
-        print('user_post_save')
-
-@receiver(pre_save, sender=User)
-def user_pre_save(sender, instance, **kwargs):
-    print('user_pre_save')
-    print(instance)
-    print(kwargs)
-    print('user_pre_save')
-
-@receiver(post_save, sender=SMSLog)
-def sms_log_post_save(sender, instance, created, **kwargs):
-
-    if created:
-        print('sms_log_post_save')
-        print(instance)
-        print(created)
-        print(kwargs)
-        print('sms_log_post_save')
-
-@receiver(pre_save, sender=SMSLog)
-def sms_log_pre_save(sender, instance, **kwargs):
-    print('sms_log_pre_save')
-    print(instance)
-    print(kwargs)
-    print('sms_log_pre_save')
-
-@receiver(post_save, sender=PhoneOTP)
-def phone_otp_post_save(sender, instance, created, **kwargs):
-    if created:
-        print('phone_otp_post_save')
-        print(instance)
-        print(created)
-        print(kwargs)
-        print('phone_otp_post_save')
-
-@receiver(pre_save, sender=PhoneOTP)
-def phone_otp_pre_save(sender, instance, **kwargs):
-    print('phone_otp_pre_save')
-    print(instance)
-    print(kwargs)
-    print('phone_otp_pre_save')
-
-@receiver(post_save, sender=SMSToken)
-def sms_token_post_save(sender, instance, created, **kwargs):
-    if created:
-        print('sms_token_post_save')
-        print(instance)
-        print(created)
-        print(kwargs)
-        print('sms_token_post_save')
-
-@receiver(pre_save, sender=SMSToken)
-def sms_token_pre_save(sender, instance, **kwargs):
-    print('sms_token_pre_save')
-    print(instance)
-    print(kwargs)
-    print('sms_token_pre_save')
-
-@receiver(pre_delete, sender=User)
-def user_pre_delete(sender, instance, **kwargs):
-    print('user_pre_delete')
-    print(instance)
-    print(kwargs)
-    print('user_pre_delete')
-
-@receiver(post_delete, sender=User)
-def user_post_delete(sender, instance, **kwargs):
-    print('user_post_delete')
-    print(instance)
-    print(kwargs)
-    print('user_post_delete')
-
-@receiver(pre_delete, sender=SMSLog)
-def sms_log_pre_delete(sender, instance, **kwargs):
-    print('sms_log_pre_delete')
-    print(instance)
-    print(kwargs)
-    print('sms_log_pre_delete')
-
-@receiver(post_delete, sender=SMSLog)
-def sms_log_post_delete(sender, instance, **kwargs):
-    print('sms_log_post_delete')
-    print(instance)
-    print(kwargs)
-    print('sms_log_post_delete')
-
-@receiver(pre_delete, sender=PhoneOTP)
-def phone_otp_pre_delete(sender, instance, **kwargs):
-    print('phone_otp_pre_delete')
-    print(instance)
-    print(kwargs)
-    print('phone_otp_pre_delete')
-
-@receiver(post_delete, sender=PhoneOTP)
-def phone_otp_post_delete(sender, instance, **kwargs):
-    print('phone_otp_post_delete')
-    print(instance)
-    print(kwargs)
-    print('phone_otp_post_delete')
-
-@receiver(pre_delete, sender=SMSToken)
-def sms_token_pre_delete(sender, instance, **kwargs):
-    print('sms_token_pre_delete')
-    print(instance)
-    print(kwargs)
-    print('sms_token_pre_delete')
-
-@receiver(post_delete, sender=SMSToken)
-def sms_token_post_delete(sender, instance, **kwargs):
-    print('sms_token_post_delete')
-    print(instance)
-    print(kwargs)
-    print('sms_token_post_delete')
+from .models import User, Device
 
 
-request_finished.connect(user_post_save)
-request_finished.connect(user_pre_save)
-request_finished.connect(sms_log_post_save)
-request_finished.connect(sms_log_pre_save)
-request_finished.connect(phone_otp_post_save)
-request_finished.connect(phone_otp_pre_save)
-request_finished.connect(sms_token_post_save)
-request_finished.connect(sms_token_pre_save)
-request_finished.connect(user_pre_delete)
-request_finished.connect(user_post_delete)
-request_finished.connect(sms_log_pre_delete)
-request_finished.connect(sms_log_post_delete)
-request_finished.connect(sms_token_post_delete)
-request_finished.connect(sms_token_pre_delete)
-request_finished.connect(phone_otp_pre_delete)
-request_finished.connect(phone_otp_post_delete)
-
+@receiver(user_logged_in)
+def logged_in_user(sender, user, request, **kwargs):
+    print("User logged in instance: ", user)
+    print("Request", request)
     
 
+user_logged_in.connect(logged_in_user)
+
+@receiver(user_logged_out)
+def logged_out_user(sender, user, request, **kwargs):
+    print("User logged out instance: ", user)
+    print("Request", request)
+
+user_logged_out.connect(logged_out_user)
+
+
+@receiver(post_save, sender=User)
+def create_user(sender, instance, created, **kwargs):
+    if created:
+        print("User created instance: ", instance)
+
+@receiver(post_delete, sender=User)
+def delete_user(sender, instance, *args, **kwargs):
+    print("User deleted instance: ", instance)
+
+@receiver(post_save, sender=Device)
+def create_device(sender, instance, created, **kwargs):
+    if created:
+        print("Device created instance: ", instance)
+        print("Device token: ", instance.get_device_token())
+       
+
+@receiver(post_delete, sender=Device)
+def delete_device(sender, instance, *args, **kwargs):
+    print("Device deleted instance: ", instance)

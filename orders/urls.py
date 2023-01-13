@@ -85,4 +85,5 @@ urlpatterns = [
     # filter by from_place and to_place_region
     path('orders/for-driver/filter/<str:from_place>/<str:to_place_region>/', AddresbyFilter4Driver.as_view(), name='filterla'),
     path('orders/for-non-driver/filter/<str:from_place>/<str:to_place_region>/', AddresbyFilter4nonDriver.as_view(), name='laslka')
+
 ]

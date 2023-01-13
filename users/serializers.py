@@ -7,15 +7,29 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, Toke
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken, AuthenticationFailed
 from django.contrib.auth import get_user_model
-from .models import PhoneOTP, User
 from django.utils.translation import gettext_lazy as _
 
+from .models import (
+    PhoneOTP, 
+    User,
+    Device,
+)
+
+
 User = get_user_model()
+
+
+class DeviceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Device
+        fields = '__all__'
+
+    
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'phone', 'phone2', 'name', 'password', 'image', 'is_active', 'is_driver')
+        fields = ('id', 'phone', 'phone2', 'name', 'password', 'image', 'is_active', 'is_driver', 'devices', )
         extra_kwargs = {
             'password': {'write_only': True},
         }

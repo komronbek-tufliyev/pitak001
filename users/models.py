@@ -9,6 +9,30 @@ from PIL import Image
 # Create your models here.
 
 
+class Device(models.Model):
+    DEVICE_TYPE = (
+        ("android", "android"),
+        ("ios", "ios"),
+        ("other", "other")
+    )
+    device_name = models.CharField(max_length=50, null=True, blank=True)
+    device_token = models.CharField(max_length=300)
+    device_type = models.CharField(max_length=10, choices=DEVICE_TYPE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.device_token[:10]
+
+    def get_device_type(self) -> str:
+        if self.device_type is not None:
+            return self.device_type
+        return "other"
+
+    def get_device_token(self) -> str:
+        return self.device_token
+
+
+
 class User(AbstractBaseUser):
     _USER_ERROR_MESSAGE = _("Bunday raqamli foydalanuvchi mavjud")
 
@@ -19,8 +43,8 @@ class User(AbstractBaseUser):
     name = models.CharField(_('name'), max_length=50, blank=True, null=True, help_text=_("To'liq ism. M: Falonchiyev Pistonchi"))
     is_driver = models.BooleanField(default=False, help_text=_("Haydovchimi"))
     image = models.ImageField(upload_to='users/', null=True, blank=True)
-    device_token = models.CharField(max_length=255, null=True, blank=True, help_text=_("Qurilmaga berilgan token(shart emas)"))
-    
+    devices = models.ManyToManyField(Device,)
+
     first_login = models.BooleanField(default=True, help_text=_("Birinchi marta login qilib kiryaptimi?"))
 
     favourite = models.ManyToManyField('orders.Order', related_name='favourite_order')
@@ -39,6 +63,16 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.phone
     
+    def get_device_tokens(self) -> list:
+        device_tokens = []
+        try: 
+            if self.devices is not None:
+                for device in self.devices.all():
+                    device_tokens.append(device.device_token)
+        except Exception as e:
+            print("Error on get_device_tokens", e)
+            pass
+        return device_tokens
 
     class Meta:
         verbose_name = _('user')
@@ -147,3 +181,5 @@ class SMSLog(models.Model):
 
     def get_message(self):
         return self.message
+
+
