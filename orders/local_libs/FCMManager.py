@@ -1,8 +1,9 @@
 import firebase_admin
 from firebase_admin import credentials, messaging
+import os
 
-json_file_path = "./push-notification-af24c-firebase-adminsdk-4dms3-11d96d19d7.json"
-cred = credentials.Certificate(json_file_path)
+file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"push-notification-af24c-firebase-adminsdk-4dms3-11d96d19d7.json")
+cred = credentials.Certificate(file_path)
 firebase_admin.initialize_app(cred)
 
 def send_push(message, title, registraton_token, dataObject=None):
