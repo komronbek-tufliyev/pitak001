@@ -6,6 +6,7 @@ from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from orders.models import Seats
+from django.shortcuts import get_object_or_404
 
 
 
@@ -15,25 +16,24 @@ class BookaSet(generics.CreateAPIView):
     http_method_names = ['post']
 
     def create(self, request, *args, **kwargs):
-        user = request.user
         order_id = request.data.get('order', None)
-        if order_id is not None:
-            order =  Order.objects.filter(pk=order_id)
-            if order.exists():
-                order = order.first()
-                serializer = SeatSerializer(data=request.data, context={'request': request, 'order': order})
-                old_seat = Seats.objects.filter(order=order, seat=request.data.get('seat'), user=user)
+        seat = request.data.get('seat')
+        if order_id and seat:
+            order =  get_object_or_404(Order, pk=order_id)
+            if order is not None:
+                old_seat = Seats.objects.filter(order=order).filter(seat=seat)
                 if not old_seat.exists():
-                    print("Bunday order mavjud emas va davom etyapman")
                     serializer = SeatSerializer(data=request.data, context={'request': request, 'order': order})
+                    print("Bunday order mavjud emas va davom etyapman")
+                    # serializer = SeatSerializer(data=request.data, context={'request': request, 'order': order})
                     if serializer.is_valid(raise_exception=True):
-                        try:
+                        # try:
                             serializer.save()
-                            print("Everything is working correctly")
+                            # print("Everything is working correctly")
                             return Response({'status': True, 'detail': serializer.data}, status=status.HTTP_201_CREATED)
-                        except Exception as e:
-                            print("Exception is working on /orders/seats/create/ route")
-                            return  Response({'status': False, 'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                        # except Exception as e:
+                            # print("Exception is working on /orders/seats/create/ route")
+                            # return  Response({'status': False, 'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         return  Response({'status': False, 'detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                 return Response({'status': False, 'detail': 'Bu joy allaqachon band qilingan'}, status=status.HTTP_400_BAD_REQUEST)
@@ -52,21 +52,23 @@ class DeleteSeatView(APIView):
         seat = self.kwargs.get('seat_number', None)
         if seat is None or order_id is None:
             return Response({'status': False, 'detail': 'order va seat berilishi shart'}, status=status.HTTP_400_BAD_REQUEST)
-        if order_id is not None:
-            order =  Order.objects.filter(pk=order_id)
-            if order.exists():
-                order = order.first()
-                old_seat = Seats.objects.filter(order=order, seat=seat)
-                if old_seat.exists():
-                    if old_seat.first().user != user:
-                        return Response({'status': False, 'detail': 'Bu joyni o\'chirishga vakolatingiz yo\'q'}, status=status.HTTP_403_FORBIDDEN)
-                    old_seat = old_seat.first().pk
-                    Seats.objects.filter(pk=old_seat).first().delete()
-                    return Response({'status':True, 'detail': 'Tanlangan joy muvaffaqqiyatli bekor qilindi'}, status=status.HTTP_200_OK)
+        
+        order =  get_object_or_404(Order, pk=order_id)
+        if order:
+            old_seat = Seats.objects.filter(order=order, seat=seat)
+            if old_seat.exists():
+                old_seat_obj = old_seat.first()
+                if old_seat_obj.user != user:
+                    return Response({'status': False, 'detail': 'Bu joyni o\'chirishga vakolatingiz yo\'q'}, status=status.HTTP_403_FORBIDDEN)
+                order.passengers.remove(old_seat_obj.pk)
+                order.save()
+                print("order passenger removed")
+                old_seat_obj.delete()
+                return Response({'status':True, 'detail': 'Tanlangan joy muvaffaqqiyatli bekor qilindi'}, status=status.HTTP_200_OK)
 
-                return Response({'status': True, 'detail': 'Bunday joy tanlanmagan'}, status=status.HTTP_400_BAD_REQUEST)
-            return Response({'status': False, 'detail': 'Bunday order topilmadi'}, status=status.HTTP_404_NOT_FOUND)
-        return Response({"status": False, 'detail': 'Nimadur xato ketdi'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': True, 'detail': 'Bunday joy tanlanmagan'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'status': False, 'detail': 'Bunday order topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+        # return Response({"status": False, 'detail': 'Nimadur xato ketdi'}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetSeatView(APIView):
     # serializer_class = SeatSerializer

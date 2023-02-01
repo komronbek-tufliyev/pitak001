@@ -1,7 +1,7 @@
 from django.dispatch import receiver
 from django.core.signals import request_finished
 from django.contrib.auth.signals import user_logged_in, user_logged_out
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete, m2m_changed
 
 from .models import (
     Order,
@@ -52,6 +52,19 @@ def delete_order(sender, instance, *args, **kwargs):
 
 @receiver(post_delete, sender=Seats)
 def delete_seats(sender, instance, *args, **kwargs):
+
+    # order_qs = sender.order
+    # print("Order passengers", order_qs.passengers.all())
+    # print("Order qs", order_qs)
+    # print("Order ", sender)
     print("Deleted seats instance: ", instance)
     print("Deleted seats sender: ", sender)
+
+# @receiver(m2m_changed, sender=Order.passengers.through)
+# def seat_deleted(sender, **kwargs):
+#     print("Kwargs of m2m changed, ", kwargs)
+#     action = kwargs.pop('action', None)
+#     pk_set = kwargs.pop('pk_set', None)
+#     if action == "pre_delete":
+#         print("Action pre_delete")
     
