@@ -335,7 +335,7 @@ class APILogoutView(APIView):
 class DeviceCreateAPIView(generics.CreateAPIView):
     serializer_class = DeviceSerializer
     queryset = Device.objects.all()
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         print("devices post called")
@@ -354,7 +354,9 @@ class DeviceCreateAPIView(generics.CreateAPIView):
         #     pass 
             # return Response({'m': 'Device already exists'}, status=status.HTTP_400_BAD_REQUEST)
         user = self.request.user 
-        if user is not None and device_token is not None:
+        if user is not None and user.is_authenticated and device_token is not None:
+            
+        # if user is not None and device_token is not None:
             device_obj = Device.objects.create(device_token=device_token, device_name=device_name, device_type=device_type)
             print("User 2", user)
             print("Device obj user", device_obj)
@@ -366,9 +368,9 @@ class DeviceCreateAPIView(generics.CreateAPIView):
             print("user.devices2", user.devices.all())
 
             print("Device object ", device_object)
-            return Response({'m': 'created'}, status=status.HTTP_201_CREATED)
+            return Response({'message': 'created'}, status=status.HTTP_201_CREATED)
 
-        return device_obj
+        return Response({'message': 'Device token is not provided'}, status=status.HTTP_400_BAD_REQUEST)
 
 class DeviceDestroyAPIView(generics.DestroyAPIView):
     serializer_class = DeviceSerializer
