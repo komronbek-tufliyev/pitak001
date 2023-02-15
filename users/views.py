@@ -342,6 +342,8 @@ class DeviceCreateAPIView(generics.CreateAPIView):
         print("request.data", request.data)
 
         device_token = request.data.get('token', None)
+        device_name = request.data.get('name', None)
+        device_type = request.data.get('type', None)
         print("device token", device_token)
         
         # try:
@@ -353,7 +355,7 @@ class DeviceCreateAPIView(generics.CreateAPIView):
             # return Response({'m': 'Device already exists'}, status=status.HTTP_400_BAD_REQUEST)
         user = self.request.user 
         if user is not None and device_token is not None:
-            device_obj = Device.objects.create(device_token=device_token, **request.data)
+            device_obj = Device.objects.create(device_token=device_token, device_name=device_name, device_type=device_type)
             print("User 2", user)
             print("Device obj user", device_obj)
             print("device pk", device_obj.pk)
