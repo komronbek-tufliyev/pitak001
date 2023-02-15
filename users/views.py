@@ -342,6 +342,8 @@ class DeviceCreateAPIView(generics.CreateAPIView):
         print("request.data", request.data)
 
         device_token = request.data.get('token', None)
+        if device_token is None:
+            device_token = request.data.get('device_token', None)
         device_name = request.data.get('name', None)
         device_type = request.data.get('type', None)
         print("device token", device_token)
