@@ -335,7 +335,7 @@ class APILogoutView(APIView):
 class DeviceCreateAPIView(generics.CreateAPIView):
     serializer_class = DeviceSerializer
     queryset = Device.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         print("devices post called")
