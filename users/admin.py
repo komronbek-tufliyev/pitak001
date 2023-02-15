@@ -22,7 +22,7 @@ class DeviceAdmin(admin.ModelAdmin):
 admin.site.register(Device, DeviceAdmin)
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'phone', 'is_driver', 'is_active', 'is_superuser', 'get_favourites']
+    list_display = ['id', 'name', 'phone', 'is_driver', 'is_active', 'is_superuser', 'get_favourites', 'get_devices']
     list_filter = ['is_superuser', 'is_active', 'is_staff', 'is_driver']
     search_fields = ['phone', 'name']
 
@@ -43,11 +43,14 @@ class UserAdmin(admin.ModelAdmin):
 
     def get_favourites(self, obj):
         if obj.favourite.all():
-            return f"Order_ids: {list(obj.favourite.all().values_list('pk', flat=True))}"
+            return f"deive ids: {list(obj.favourite.all().values_list('pk', flat=True))}"
         else:
-            return 'No favourite orders'
+            return 'No devices'
         # return self.favourite.pk
-
+    def get_devices(self, obj):
+        return f"Order_ids: {obj.get_device_tokens()}"
+        
+        
     
 admin.site.register(User, UserAdmin)
 

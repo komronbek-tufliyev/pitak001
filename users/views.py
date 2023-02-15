@@ -338,13 +338,27 @@ class DeviceCreateAPIView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
-        device_obj = super().post(request, *args, **kwargs)
+        print("devices post called")
+        
+        try:
+            device_obj = super().post(request, *args, **kwargs)
+            print("Device obj", device_obj)
+        except Exception as e:
+            print("Device post exception", e)
+            pass 
+            # return Response({'m': 'Device already exists'}, status=status.HTTP_400_BAD_REQUEST)
         user = self.request.user 
         if user is not None:
             device_obj = Device.objects.create(**request.data)
-            print("User", user)
-            print("Device obj", device_obj)
+            print("User 2", user)
+            print("Device obj user", device_obj)
+            print("device pk", device_obj.pk)
+            print("user.devices", user.devices.all())
             device_object = user.devices.add(device_obj.pk)
+            # user.save()
+            print("Anaqa shunaqa mamnaqa", user.get_device_tokens())
+            print("user.devices2", user.devices.all())
+
             print("Device object ", device_object)
             return Response({'m': 'created'}, status=status.HTTP_201_CREATED)
 
